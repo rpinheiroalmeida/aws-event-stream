@@ -1,8 +1,8 @@
 {
-  "name": "@eventstore.net/event.store",
-  "version": "1.7.0",
-  "description": "A simple and fast EventStore that support multiple persistence and notification providers",
-  "author": "Thiago da Rosa de Bustamante <trbustamante@gmail.com>",
+  "name": "aws-event-stream",
+  "version": "1.0.0",
+  "description": "A simple and fast EventStore for AWS.",
+  "author": "Rodrigo Pinheiro de Almeida <rpinheiroalmeida@gmail.com>",
   "license": "MIT",
   "main": "./dist/index.js",
   "typings": "./dist/index.d.ts",
@@ -11,7 +11,10 @@
     "Event",
     "event sourcing",
     "eventsourcing",
-    "cqrs"
+    "cqrs",
+    "aws",
+    "DynamoDB",
+    "SQS"
   ],
   "scripts": {
     "build": "npm run clean && tsc",
@@ -49,10 +52,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/thiagobustamante/node-eventstore"
+    "url": "https://github.com/rpinheiroalmeida/aws-event-stream.git"
   },
   "bugs": {
-    "url": "https://github.com/thiagobustamante/node-eventstore/issues"
+    "url": "https://github.com/rpinheiroalmeida/aws-event-stream.git/issues"
   },
   "directories": {
     "lib": "dist"
@@ -99,13 +102,9 @@
     "typescript": "^3.3.3"
   },
   "dependencies": {
-    "amqplib": "^0.5.3",
     "aws-sdk": "^2.648.0",
-    "ioredis": "^4.6.2",
     "joi": "^13.7.0",
     "lodash": "^4.17.11",
-    "mongodb": "^3.1.13",
-    "mysql": "^2.16.0",
     "sqs-consumer": "^5.4.0"
   },
   "publishConfig": {
