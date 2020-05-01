@@ -71,10 +71,9 @@ describe('EventStory Dynamodb Provider', () => {
         const dynamodbProvider: any = new DynamodbProvider({ region: 'any region' });
         await dynamodbProvider.addEvent({ aggregation: 'orders', id: '1' }, 'EVENT PAYLOAD');
 
-        expect(putStub).to.have.been.calledTwice;
+        expect(putStub).to.have.been.calledOnce;
 
-        expect(putStub.getCall(0)).to.have.been.calledWithExactly({ Item: { aggregation: "orders", stream: "1" }, TableName: "aggregations" });
-        expect(putStub.getCall(1)).to.have.been.calledWithExactly(
+        expect(putStub.getCall(0)).to.have.been.calledWithExactly(
             {
                 Item: eventItem,
                 TableName: "events"
@@ -82,34 +81,6 @@ describe('EventStory Dynamodb Provider', () => {
         );
     });
 
-    it('should be able to add an Event to the Event Stream when aggregation already exists', async () => {
-        const dynamodbProvider: any = new DynamodbProvider({ region: 'any region' });
-        await dynamodbProvider.addEvent({ aggregation: 'orders', id: '1' }, 'EVENT PAYLOAD');
-        await dynamodbProvider.addEvent({ aggregation: 'orders', id: '1' }, 'EVENT PAYLOAD SAMPLE');
-
-        expect(putStub).to.have.been.calledThrice;
-
-        expect(putStub.getCall(0)).to.have.been.calledWithExactly({
-            Item: { aggregation: "orders", stream: "1" }, TableName: "aggregations"
-        });
-        expect(putStub.getCall(1)).to.have.been.calledWithExactly(
-            {
-                Item: eventItem,
-                TableName: "events"
-            }
-        );
-        expect(putStub.getCall(2)).to.have.been.calledWithExactly(
-            {
-                Item: {
-                    aggregation_streamid: "orders:1",
-                    commitTimestamp: now.getTime(),
-                    payload: "EVENT PAYLOAD SAMPLE",
-                    stream: { aggregation: "orders", id: "1" }
-                },
-                TableName: "events"
-            }
-        );
-    });
 
     it('should be able to ask dynamodb the events', async () => {
         promiseStub.resolves({
@@ -131,46 +102,5 @@ describe('EventStory Dynamodb Provider', () => {
             }
         );
     });
-
-    it('should be able to ask dynamodb the streams', async () => {
-
-        promiseStub.resolves({
-            Items: [eventItem]
-        });
-
-        const dynamodbProvider: DynamodbProvider = new DynamodbProvider({ region: 'any region' });
-        const streams = await dynamodbProvider.getStreams('aggregation');
-
-        expect(streams).to.eql(
-            [{ aggregation: "orders", id: "1" }]
-        );
-        expect(queryStub).to.have.been.calledOnce;
-        expect(queryStub).to.have.been.calledWithExactly(
-            {
-                ConsistentRead: true,
-                ExpressionAttributeValues: { ':aggregation': "aggregation" },
-                KeyConditionExpression: "aggregation = :aggregation",
-                ScanIndexForward: false,
-                TableName: "aggregations"
-            }
-        );
-    });
-
-    it('should be able to ask dynamodb the aggregations', async () => {
-        promiseStub.resolves({ Items: [{ aggregation: 'orders' }] });
-
-        const dynamodbProvider: DynamodbProvider = new DynamodbProvider({ region: 'any region' });
-        const aggregations = await dynamodbProvider.getAggregations();
-
-        expect(aggregations).to.eql(["orders"]);
-        expect(scanStub).to.have.been.calledOnce;
-        expect(scanStub).to.have.been.calledWithExactly(
-            {
-                TableName: 'aggregations',
-            }
-        );
-    });
-
-
 
 });

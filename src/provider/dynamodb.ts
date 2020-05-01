@@ -14,18 +14,15 @@ import { PersistenceProvider } from './provider';
  */
 export class DynamodbProvider implements PersistenceProvider {
     private documentClient: DocumentClient;
-    private aggregationsLocalCache: Map<String, String>;
 
     constructor(awsConfig: AWSConfig) {
         AWS.config.update(awsConfig);
 
         this.documentClient = new DynamoDB.DocumentClient();
-        this.aggregationsLocalCache = new Map();
     }
 
     public async addEvent(stream: Stream, data: any): Promise<Event> {
         const now = new Date();
-        this.addAggregation(stream);
         const commitTimestamp = now.getTime();
         const event = {
             aggregation_streamid: `${this.getKey(stream)}`,
@@ -66,40 +63,11 @@ export class DynamodbProvider implements PersistenceProvider {
     }
 
     public async getAggregations(offset: number = 0, limit: number = -1): Promise<Array<string>> {
-        const filter = { TableName: 'aggregations', };
-
-        const items = await this.documentClient.scan(filter).promise();
-        return items.Items.map(data => data.aggregation);
+        throw new Error('Method not supported');
     }
 
     public async getStreams(aggregation: string, offset: number = 0, limit: number = -1): Promise<Array<string>> {
-        const aggregationFilter = {
-            ConsistentRead: true,
-            ExpressionAttributeValues: {
-                ':aggregation': aggregation
-            },
-            KeyConditionExpression: 'aggregation = :aggregation',
-            ScanIndexForward: false,
-            TableName: 'aggregations',
-        };
-
-        const items = (await this.documentClient.query(aggregationFilter).promise()).Items;
-
-        return items.map(data => data.stream);
-    }
-
-    private async addAggregation(stream: Stream) {
-        if (!this.aggregationsLocalCache.has(stream.aggregation)) {
-            const param = {
-                Item: {
-                    aggregation: stream.aggregation,
-                    stream: stream.id
-                },
-                TableName: 'aggregations',
-            };
-            this.documentClient.put(param).promise()
-            this.aggregationsLocalCache.set(stream.aggregation, stream.id);
-        }
+        throw new Error('Method not supported');
     }
 
     private getKey(stream: Stream): string {
