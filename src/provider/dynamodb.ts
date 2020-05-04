@@ -20,7 +20,7 @@ export class DynamodbProvider implements PersistenceProvider {
         this.config = config;
         AWS.config.update({ region: config.awsConfig.region });
 
-        this.documentClient = new DynamoDB.DocumentClient();
+        this.documentClient = new DynamoDB.DocumentClient({ convertEmptyValues: true });
     }
 
     public async addEvent(stream: Stream, data: any): Promise<Event> {
