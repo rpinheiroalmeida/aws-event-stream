@@ -82,7 +82,7 @@ describe('EventStory Dynamodb Provider', () => {
     });
 
 
-    it('should be able to ask dynamodb the events', async () => {
+    it('should be able to ask dynamodb the all the events', async () => {
         promiseStub.resolves({
             Items: [eventItem]
         });
@@ -91,14 +91,85 @@ describe('EventStory Dynamodb Provider', () => {
         const events = await dynamodbProvider.getEvents({ aggregation: "orders", id: "1" } as Stream);
 
         expect(events).to.eql(
-            [{ commitTimestamp: now.getTime(), payload: "EVENT PAYLOAD", sequence: 1 }]
+            [{ commitTimestamp: now.getTime(), payload: "EVENT PAYLOAD", sequence: 0 }]
         );
         expect(queryStub).to.have.been.calledOnce;
         expect(queryStub).to.have.been.calledWith(
             {
                 ExpressionAttributeValues: { ':key': "orders:1" },
                 KeyConditionExpression: "aggregation_streamid = :key",
+                ScanIndexForward: false,
                 TableName: "events"
+            }
+        );
+    });
+
+    it('should be able to ask dynamodb the events paginated', async () => {
+        promiseStub.resolves({
+            Items: [eventItem, eventItem, eventItem, eventItem, eventItem, eventItem]
+        });
+
+        const dynamodbProvider: DynamodbProvider = new DynamodbProvider({ region: 'any region' });
+        const events = await dynamodbProvider.getEvents({ aggregation: "orders", id: "1" } as Stream, 1, 4);
+
+        expect(events.length).to.be.eq(4);
+        expect(events).to.eql(
+            [{ commitTimestamp: now.getTime(), payload: "EVENT PAYLOAD", sequence: 1 },
+            { commitTimestamp: now.getTime(), payload: "EVENT PAYLOAD", sequence: 2 },
+            { commitTimestamp: now.getTime(), payload: "EVENT PAYLOAD", sequence: 3 },
+            { commitTimestamp: now.getTime(), payload: "EVENT PAYLOAD", sequence: 4 }]
+        );
+        expect(queryStub).to.have.been.calledOnce;
+        expect(queryStub).to.have.been.calledWith(
+            {
+                ExpressionAttributeValues: { ':key': "orders:1" },
+                KeyConditionExpression: "aggregation_streamid = :key",
+                Limit: 4,
+                ScanIndexForward: false,
+                TableName: "events",
+            }
+        );
+    });
+
+    it('should be able to ask dynamodb the events paginated elements from second page', async () => {
+        promiseStub.resolves({
+            Items: [eventItem, eventItem, eventItem, eventItem, eventItem, eventItem, eventItem, eventItem, eventItem]
+        });
+
+        const dynamodbProvider: DynamodbProvider = new DynamodbProvider({ region: 'any region' });
+        const events = await dynamodbProvider.getEvents({ aggregation: "orders", id: "1" } as Stream, 2, 2);
+
+        expect(events.length).to.be.eq(2);
+        expect(events).to.eql(
+            [{ commitTimestamp: now.getTime(), payload: "EVENT PAYLOAD", sequence: 2 },
+            { commitTimestamp: now.getTime(), payload: "EVENT PAYLOAD", sequence: 3 }],
+        );
+        expect(queryStub).to.have.been.calledOnce;
+        expect(queryStub).to.have.been.calledWith(
+            {
+                ExpressionAttributeValues: { ':key': "orders:1" },
+                KeyConditionExpression: "aggregation_streamid = :key",
+                Limit: 2,
+                ScanIndexForward: false,
+                TableName: "events",
+            }
+        );
+
+        const eventsPage3 = await dynamodbProvider.getEvents({ aggregation: "orders", id: "1" } as Stream, 3, 2);
+
+        expect(eventsPage3.length).to.be.eq(2);
+        expect(eventsPage3).to.eql(
+            [{ commitTimestamp: now.getTime(), payload: "EVENT PAYLOAD", sequence: 3 },
+            { commitTimestamp: now.getTime(), payload: "EVENT PAYLOAD", sequence: 4 }],
+        );
+        expect(queryStub).to.have.been.calledTwice;
+        expect(queryStub).to.have.been.calledWith(
+            {
+                ExpressionAttributeValues: { ':key': "orders:1" },
+                KeyConditionExpression: "aggregation_streamid = :key",
+                Limit: 2,
+                ScanIndexForward: false,
+                TableName: "events",
             }
         );
     });

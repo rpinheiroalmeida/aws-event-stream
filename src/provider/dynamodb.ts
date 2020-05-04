@@ -2,12 +2,12 @@
 
 import { DynamoDB } from 'aws-sdk';
 import AWS = require('aws-sdk');
-import { DocumentClient, ItemList } from 'aws-sdk/clients/dynamodb';
+import { DocumentClient, ItemList, QueryOutput } from 'aws-sdk/clients/dynamodb';
+import * as _ from 'lodash';
 import { AWSConfig } from '../aws/config';
 import { Event } from '../model/event';
 import { Stream } from '../model/stream';
 import { PersistenceProvider } from './provider';
-
 
 /**
  * A Persistence Provider that handle all the data in Dynamodb.
@@ -45,21 +45,36 @@ export class DynamodbProvider implements PersistenceProvider {
 
 
     public async getEvents(stream: Stream, offset: number = 0, limit: number = -1): Promise<Array<Event>> {
-        const filter = {
+        let exclusiveStartKey: any;
+        let filter = {
             ExpressionAttributeValues: { ':key': this.getKey(stream) },
             KeyConditionExpression: 'aggregation_streamid = :key',
+            ScanIndexForward: false,
             TableName: 'events',
         };
+        const pageSize = offset + limit;
+        if (pageSize > 0) {
+            filter = _.merge(filter, { Limit: limit });
+        }
 
-        const items: ItemList = (await this.documentClient.query(filter).promise()).Items;
+        let items: ItemList = [];
+        do {
+            if (exclusiveStartKey) {
+                filter = _.merge(filter, { ExclusiveStartKey: exclusiveStartKey });
+            }
+            const queryOutput: QueryOutput = (await this.documentClient.query(filter).promise());
+            exclusiveStartKey = queryOutput.LastEvaluatedKey || null;
+            items = items.concat(queryOutput.Items);
+        } while (items.length < pageSize);
 
-        return items.map((data, index) => {
+        const events = items.map((data, index) => {
             return {
                 commitTimestamp: data.commitTimestamp,
                 payload: data.payload,
-                sequence: index + 1,
+                sequence: index,
             } as Event;
         });
+        return pageSize === -1 ? events.slice(offset) : events.slice(offset, pageSize);
     }
 
     public async getAggregations(offset: number = 0, limit: number = -1): Promise<Array<string>> {
