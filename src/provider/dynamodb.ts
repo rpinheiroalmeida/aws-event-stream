@@ -4,7 +4,7 @@ import { DynamoDB } from 'aws-sdk';
 import AWS = require('aws-sdk');
 import { DocumentClient, ItemList, QueryOutput } from 'aws-sdk/clients/dynamodb';
 import * as _ from 'lodash';
-import { AWSConfig } from '../aws/config';
+import { Config } from '../dynamodb/dynamodb-config';
 import { Event } from '../model/event';
 import { Stream } from '../model/stream';
 import { PersistenceProvider } from './provider';
@@ -14,9 +14,11 @@ import { PersistenceProvider } from './provider';
  */
 export class DynamodbProvider implements PersistenceProvider {
     private documentClient: DocumentClient;
+    private config: Config;
 
-    constructor(awsConfig: AWSConfig) {
-        AWS.config.update(awsConfig);
+    constructor(config: Config) {
+        this.config = config;
+        AWS.config.update({ region: config.awsConfig.region });
 
         this.documentClient = new DynamoDB.DocumentClient();
     }
@@ -32,7 +34,7 @@ export class DynamodbProvider implements PersistenceProvider {
         };
         const record = {
             Item: event,
-            TableName: 'events',
+            TableName: this.config.dynamodb.tableName,
         };
 
         await this.documentClient.put(record).promise();
@@ -50,7 +52,7 @@ export class DynamodbProvider implements PersistenceProvider {
             ExpressionAttributeValues: { ':key': this.getKey(stream) },
             KeyConditionExpression: 'aggregation_streamid = :key',
             ScanIndexForward: false,
-            TableName: 'events',
+            TableName: this.config.dynamodb.tableName,
         };
         const pageSize = offset + limit;
         if (pageSize > 0) {

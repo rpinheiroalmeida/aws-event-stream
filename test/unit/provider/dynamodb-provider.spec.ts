@@ -7,6 +7,7 @@ import * as sinonChai from 'sinon-chai';
 chai.use(sinonChai);
 import AWS = require('aws-sdk');
 import { DynamoDB } from 'aws-sdk';
+import { Config } from '../../../src/dynamodb/dynamodb-config';
 import { Stream } from '../../../src/model/stream';
 import { DynamodbProvider } from '../../../src/provider/dynamodb';
 
@@ -23,6 +24,14 @@ describe('EventStory Dynamodb Provider', () => {
 
     let clock: sinon.SinonFakeTimers;
     const now = new Date();
+    const dynamodbConfig = {
+        awsConfig: {
+            region: 'us-east-1',
+        },
+        dynamodb: {
+            tableName: 'events',
+        },
+    } as Config;
 
     beforeEach(() => {
 
@@ -68,7 +77,7 @@ describe('EventStory Dynamodb Provider', () => {
     };
 
     it('should be able to add an Event to the Event Stream', async () => {
-        const dynamodbProvider: any = new DynamodbProvider({ region: 'any region' });
+        const dynamodbProvider: any = new DynamodbProvider(dynamodbConfig);
         await dynamodbProvider.addEvent({ aggregation: 'orders', id: '1' }, 'EVENT PAYLOAD');
 
         expect(putStub).to.have.been.calledOnce;
@@ -87,7 +96,7 @@ describe('EventStory Dynamodb Provider', () => {
             Items: [eventItem]
         });
 
-        const dynamodbProvider: DynamodbProvider = new DynamodbProvider({ region: 'any region' });
+        const dynamodbProvider: DynamodbProvider = new DynamodbProvider(dynamodbConfig);
         const events = await dynamodbProvider.getEvents({ aggregation: "orders", id: "1" } as Stream);
 
         expect(events).to.eql(
@@ -109,7 +118,7 @@ describe('EventStory Dynamodb Provider', () => {
             Items: [eventItem, eventItem, eventItem, eventItem, eventItem, eventItem]
         });
 
-        const dynamodbProvider: DynamodbProvider = new DynamodbProvider({ region: 'any region' });
+        const dynamodbProvider: DynamodbProvider = new DynamodbProvider(dynamodbConfig);
         const events = await dynamodbProvider.getEvents({ aggregation: "orders", id: "1" } as Stream, 1, 4);
 
         expect(events.length).to.be.eq(4);
@@ -136,7 +145,7 @@ describe('EventStory Dynamodb Provider', () => {
             Items: [eventItem, eventItem, eventItem, eventItem, eventItem, eventItem, eventItem, eventItem, eventItem]
         });
 
-        const dynamodbProvider: DynamodbProvider = new DynamodbProvider({ region: 'any region' });
+        const dynamodbProvider: DynamodbProvider = new DynamodbProvider(dynamodbConfig);
         const events = await dynamodbProvider.getEvents({ aggregation: "orders", id: "1" } as Stream, 2, 2);
 
         expect(events.length).to.be.eq(2);
