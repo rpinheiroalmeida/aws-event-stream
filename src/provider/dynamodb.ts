@@ -16,7 +16,7 @@ import { PersistenceProvider } from './provider';
 export class DynamodbProvider implements PersistenceProvider {
     private documentClient: DocumentClient;
     private config: Config;
-    private initialized: false;
+    private initialized: boolean;
     private schema: Schema;
 
     constructor(config: Config) {
@@ -75,12 +75,14 @@ export class DynamodbProvider implements PersistenceProvider {
         } while (items.length < pageSize);
 
         const events = items.map((data, index) => {
+            console.log(`event returned: ${JSON.stringify(data)}`);
             return {
                 commitTimestamp: data.commitTimestamp,
                 payload: data.payload,
                 sequence: index,
             } as Event;
         });
+
         return pageSize === -1 ? events.slice(offset) : events.slice(offset, pageSize);
     }
 
@@ -95,12 +97,9 @@ export class DynamodbProvider implements PersistenceProvider {
 
     private async ensureTables() {
         if (!this.initialized && this.config.dynamodb.createTable) {
-            await this.createTable();
+            await this.schema.createTables();
+            this.initialized = true;
         }
-    }
-
-    private async createTable() {
-        await this.schema.createTables();
     }
 
     private getKey(stream: Stream): string {
