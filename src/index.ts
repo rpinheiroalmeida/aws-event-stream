@@ -1,5 +1,6 @@
 'use strict';
 
+import { Config } from './dynamodb/dynamodb-config';
 import { EventStore, EventStream } from './event-store';
 import { Event } from './model/event';
 import { Message } from './model/message';
@@ -14,6 +15,7 @@ import { SQSPublisher } from './publisher/sqs';
 export { InMemoryProvider };
 export { PersistenceProvider };
 export { DynamodbProvider };
+export { Config };
 export { Publisher };
 export { InMemoryPublisher };
 export { EventStore };

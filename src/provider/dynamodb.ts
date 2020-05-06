@@ -5,6 +5,7 @@ import AWS = require('aws-sdk');
 import { DocumentClient, ItemList, QueryOutput } from 'aws-sdk/clients/dynamodb';
 import * as _ from 'lodash';
 import { Config } from '../dynamodb/dynamodb-config';
+import { Schema } from '../dynamodb/schema';
 import { Event } from '../model/event';
 import { Stream } from '../model/stream';
 import { PersistenceProvider } from './provider';
@@ -21,6 +22,9 @@ export class DynamodbProvider implements PersistenceProvider {
         AWS.config.update({ region: config.awsConfig.region });
 
         this.documentClient = new DynamoDB.DocumentClient({ convertEmptyValues: true });
+        if (config.dynamodb.createTable) {
+            new Schema(this.config).createTables();
+        }
     }
 
     public async addEvent(stream: Stream, data: any): Promise<Event> {
