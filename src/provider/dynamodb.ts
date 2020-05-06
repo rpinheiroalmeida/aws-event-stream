@@ -19,7 +19,8 @@ export class DynamodbProvider implements PersistenceProvider {
 
     constructor(config: Config) {
         this.config = config;
-        AWS.config.update({ region: config.awsConfig.region });
+
+        AWS.config.update(config.awsConfig);
 
         this.documentClient = new DynamoDB.DocumentClient({ convertEmptyValues: true });
         if (config.dynamodb.createTable) {
