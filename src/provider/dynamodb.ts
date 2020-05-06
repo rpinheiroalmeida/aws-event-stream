@@ -16,19 +16,18 @@ import { PersistenceProvider } from './provider';
 export class DynamodbProvider implements PersistenceProvider {
     private documentClient: DocumentClient;
     private config: Config;
+    private initialized: false;
+    private schema: Schema;
 
     constructor(config: Config) {
         this.config = config;
 
         AWS.config.update(config.awsConfig);
-
         this.documentClient = new DynamoDB.DocumentClient({ convertEmptyValues: true });
-        if (config.dynamodb.createTable) {
-            new Schema(this.config).createTables();
-        }
+        this.schema = new Schema(this.config);
     }
-
     public async addEvent(stream: Stream, data: any): Promise<Event> {
+        await this.ensureTables();
         const now = new Date();
         const commitTimestamp = now.getTime();
         const event = {
@@ -52,6 +51,7 @@ export class DynamodbProvider implements PersistenceProvider {
 
 
     public async getEvents(stream: Stream, offset: number = 0, limit: number = -1): Promise<Array<Event>> {
+        await this.ensureTables();
         let exclusiveStartKey: any;
         let filter = {
             ExpressionAttributeValues: { ':key': this.getKey(stream) },
@@ -90,6 +90,17 @@ export class DynamodbProvider implements PersistenceProvider {
 
     public async getStreams(aggregation: string, offset: number = 0, limit: number = -1): Promise<Array<string>> {
         throw new Error('Method not supported');
+    }
+
+
+    private async ensureTables() {
+        if (!this.initialized && this.config.dynamodb.createTable) {
+            await this.createTable();
+        }
+    }
+
+    private async createTable() {
+        await this.schema.createTables();
     }
 
     private getKey(stream: Stream): string {

@@ -20,6 +20,13 @@ describe('EventStory Dynamodb Provider', () => {
     let putStub: sinon.SinonStubbedInstance<any>;
     let queryStub: sinon.SinonStubbedInstance<any>;
     let scanStub: sinon.SinonStubbedInstance<any>;
+
+    let dynamodbStub: sinon.SinonStub;
+    let createTable: sinon.SinonStubbedInstance<any>;
+    let createTableStub: sinon.SinonStub;
+    let listTables: sinon.SinonStubbedInstance<any>;
+    let listTablesStub: sinon.SinonStub;
+
     let promiseStub: sinon.SinonStub;
 
     let clock: sinon.SinonFakeTimers;
@@ -56,7 +63,24 @@ describe('EventStory Dynamodb Provider', () => {
             };
         });
 
+        createTableStub = sinon.stub();
+        createTable = sinon.spy((data: any): any => {
+            return {
+                promise: createTableStub,
+            };
+        });
+        listTablesStub = sinon.stub();
+        listTables = sinon.spy((data: any): any => {
+            return {
+                promise: listTablesStub,
+            };
+        });
+
         sinon.stub(AWS, "config").returns({ update: (): any => null });
+        dynamodbStub = sinon.stub(AWS, "DynamoDB").returns({
+            createTable: createTable,
+            listTables: listTables,
+        });
         documentClientStub = sinon.stub(DynamoDB, 'DocumentClient').returns({
             put: putStub,
             query: queryStub,
@@ -67,6 +91,7 @@ describe('EventStory Dynamodb Provider', () => {
     afterEach(() => {
         clock.restore();
         documentClientStub.restore();
+        dynamodbStub.restore();
     });
 
     const eventItem = {
@@ -90,6 +115,33 @@ describe('EventStory Dynamodb Provider', () => {
         );
     });
 
+    it('should be able to add an Event to the Event Stream when table does not exist', async () => {
+        const config = {
+            awsConfig: {
+                region: 'us-east-1',
+            },
+            dynamodb: {
+                createTable: true,
+                tableName: 'events',
+            },
+        } as Config;
+
+        listTablesStub.returns({ TableNames: [] });
+
+        const dynamodbProvider: any = new DynamodbProvider(config);
+        await dynamodbProvider.addEvent({ aggregation: 'orders', id: '1' }, 'EVENT PAYLOAD');
+
+        expect(createTable).to.have.been.calledOnce;
+        expect(listTables).to.have.been.calledOnce;
+        expect(putStub).to.have.been.calledOnce;
+
+        expect(putStub.getCall(0)).to.have.been.calledWithExactly(
+            {
+                Item: eventItem,
+                TableName: "events"
+            }
+        );
+    });
 
     it('should be able to ask dynamodb the all the events', async () => {
         promiseStub.resolves({
@@ -98,6 +150,43 @@ describe('EventStory Dynamodb Provider', () => {
 
         const dynamodbProvider: DynamodbProvider = new DynamodbProvider(dynamodbConfig);
         const events = await dynamodbProvider.getEvents({ aggregation: "orders", id: "1" } as Stream);
+
+        expect(events).to.eql(
+            [{ commitTimestamp: now.getTime(), payload: "EVENT PAYLOAD", sequence: 0 }]
+        );
+        expect(queryStub).to.have.been.calledOnce;
+        expect(queryStub).to.have.been.calledWith(
+            {
+                ExpressionAttributeValues: { ':key': "orders:1" },
+                KeyConditionExpression: "aggregation_streamid = :key",
+                ScanIndexForward: false,
+                TableName: "events"
+            }
+        );
+    });
+
+    it('should be able to ask dynamodb the all the events when table does not exist', async () => {
+        promiseStub.resolves({
+            Items: [eventItem]
+        });
+
+        const config = {
+            awsConfig: {
+                region: 'us-east-1',
+            },
+            dynamodb: {
+                createTable: true,
+                tableName: 'events',
+            },
+        } as Config;
+
+        listTablesStub.returns({ TableNames: [] });
+
+        const dynamodbProvider: DynamodbProvider = new DynamodbProvider(config);
+        const events = await dynamodbProvider.getEvents({ aggregation: "orders", id: "1" } as Stream);
+
+        expect(createTable).to.have.been.calledOnce;
+        expect(listTables).to.have.been.calledOnce;
 
         expect(events).to.eql(
             [{ commitTimestamp: now.getTime(), payload: "EVENT PAYLOAD", sequence: 0 }]
