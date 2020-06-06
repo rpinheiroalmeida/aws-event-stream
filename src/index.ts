@@ -10,6 +10,7 @@ import { PersistenceProvider } from './provider/provider';
 
 import { InMemoryPublisher } from './publisher/memory';
 import { Publisher } from './publisher/publisher';
+import { SNSPublisher } from './publisher/sns';
 import { SQSPublisher } from './publisher/sqs';
 
 export { InMemoryProvider };
@@ -23,3 +24,4 @@ export { EventStream };
 export { Event };
 export { Message };
 export { SQSPublisher };
+export { SNSPublisher };
