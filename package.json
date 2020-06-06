@@ -1,6 +1,6 @@
 {
   "name": "aws-event-stream",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "A simple and fast EventStore for AWS.",
   "author": "Rodrigo Pinheiro de Almeida <rpinheiroalmeida@gmail.com>",
   "license": "MIT",
@@ -107,7 +107,8 @@
     "aws-sdk": "^2.648.0",
     "joi": "^13.7.0",
     "lodash": "^4.17.15",
-    "sqs-consumer": "^5.4.0"
+    "sqs-consumer": "^5.4.0",
+    "@eventstore.net/event.store": "^1.7.1"
   },
   "publishConfig": {
     "access": "public"

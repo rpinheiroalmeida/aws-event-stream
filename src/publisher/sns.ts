@@ -1,8 +1,8 @@
 
+import { HasSubscribers, Publisher, Subscriber, Subscription } from '@eventstore.net/event.store';
 import { config, SNS } from 'aws-sdk';
-import { Message, Publisher } from '..';
 import { AWSConfig } from '../aws/config';
-import { HasSubscribers, Subscriber, Subscription } from './publisher';
+import { MessageType } from '../model/message';
 
 export interface SNSOption {
     protocol: Protocols;
@@ -28,9 +28,15 @@ export class SNSPublisher implements Publisher, HasSubscribers {
         this.snsOption = snsOptions;
     }
 
-    public async publish(message: Message): Promise<boolean> {
+    public async publish(message: MessageType): Promise<boolean> {
         const snsData = {
             Message: JSON.stringify(message),
+            MessageAttributes: {
+                eventType: {
+                    DataType: 'String',
+                    StringValue: message.eventType,
+                }
+            },
             TopicArn: this.url,
         };
 
