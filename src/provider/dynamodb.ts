@@ -75,7 +75,6 @@ export class DynamodbProvider implements PersistenceProvider {
         } while (items.length < pageSize);
 
         const events = items.map((data, index) => {
-            console.log(`event returned: ${JSON.stringify(data)}`);
             return {
                 commitTimestamp: data.commitTimestamp,
                 payload: data.payload,
