@@ -1,6 +1,8 @@
-import { HasSubscribers, Message, Publisher, Subscriber, Subscription } from '@eventstore.net/event.store';
+
 import { config, SNS } from 'aws-sdk';
+import { Message, Publisher } from '..';
 import { AWSConfig } from '../aws/config';
+import { HasSubscribers, Subscriber, Subscription } from './publisher';
 
 export interface SNSOption {
     protocol: Protocols;
@@ -20,7 +22,7 @@ export class SNSPublisher implements Publisher, HasSubscribers {
     private snsOption: SNSOption;
 
     constructor(url: string, awsconfig: AWSConfig, snsOptions?: SNSOption) {
-        config.update(awsconfig.aws);
+        config.update(awsconfig);
         this.sns = new SNS();
         this.url = url;
         this.snsOption = snsOptions;
