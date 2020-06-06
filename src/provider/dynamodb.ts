@@ -9,7 +9,6 @@ import * as _ from 'lodash';
 import { Config } from '../dynamodb/dynamodb-config';
 import { Schema } from '../dynamodb/schema';
 import { EventType } from '../model/event';
-import { EventData } from '../model/event-data';
 
 /**
  * A Persistence Provider that handle all the data in Dynamodb.
@@ -28,7 +27,7 @@ export class DynamodbProvider implements PersistenceProvider {
         this.schema = new Schema(this.config);
     }
 
-    public async addEvent(stream: Stream, data: EventData): Promise<EventType> {
+    public async addEvent(stream: Stream, data: any): Promise<EventType> {
         await this.ensureTables();
         const now = new Date();
         const commitTimestamp = now.getTime();

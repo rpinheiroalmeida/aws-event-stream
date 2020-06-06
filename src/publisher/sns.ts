@@ -4,6 +4,7 @@ import { config, SNS } from 'aws-sdk';
 import { AWSConfig } from '../aws/config';
 import { MessageType } from '../model/message';
 
+
 export interface SNSOption {
     protocol: Protocols;
     endpointSubscriber: string;
@@ -34,7 +35,7 @@ export class SNSPublisher implements Publisher, HasSubscribers {
             MessageAttributes: {
                 eventType: {
                     DataType: 'String',
-                    StringValue: message.eventType,
+                    StringValue: message.event.eventType,
                 }
             },
             TopicArn: this.url,
