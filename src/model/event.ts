@@ -1,8 +1,21 @@
-import { Event } from "@eventstore.net/event.store";
+'use strict';
 
-export interface EventType extends Event {
+/**
+ * An Event in the stream of events
+ */
+export interface Event {
     /**
-     * The type of event
+     * The event payload. The payload can be any data associated with the event
      */
-    eventType: string;
+    payload: any;
+    /**
+     * The time where the event was persisted in the {@link EventStream}
+     */
+    commitTimestamp?: number;
+    /**
+     * The sequence order for the event in the {@link EventStream}
+     */
+    sequence?: number;
+
+    type?: string;
 }

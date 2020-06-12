@@ -1,14 +1,15 @@
 'use strict';
 
-import { Event, PersistenceProvider } from '@eventstore.net/event.store';
-import { Stream } from '@eventstore.net/event.store/dist/model/stream';
+
 import { DynamoDB } from 'aws-sdk';
 import AWS = require('aws-sdk');
 import { DocumentClient, ItemList, QueryOutput } from 'aws-sdk/clients/dynamodb';
 import * as _ from 'lodash';
 import { Config } from '../dynamodb/dynamodb-config';
 import { Schema } from '../dynamodb/schema';
-import { EventType } from '../model/event';
+import { Event } from '../model/event';
+import { Stream } from '../model/stream';
+import { PersistenceProvider } from './provider';
 
 /**
  * A Persistence Provider that handle all the data in Dynamodb.
@@ -27,7 +28,7 @@ export class DynamodbProvider implements PersistenceProvider {
         this.schema = new Schema(this.config);
     }
 
-    public async addEvent(stream: Stream, data: any): Promise<EventType> {
+    public async addEvent(stream: Stream, data: any): Promise<Event> {
         await this.ensureTables();
         const now = new Date();
         const commitTimestamp = now.getTime();
@@ -46,7 +47,7 @@ export class DynamodbProvider implements PersistenceProvider {
 
         return {
             commitTimestamp: commitTimestamp,
-            eventType: data.eventType,
+            type: data.eventType,
             payload: data.payload,
         };
     }
