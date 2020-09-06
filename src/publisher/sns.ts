@@ -1,8 +1,8 @@
 
-import { HasSubscribers, Publisher, Subscriber, Subscription } from '@eventstore.net/event.store';
 import { config, SNS } from 'aws-sdk';
 import { AWSConfig } from '../aws/config';
 import { MessageType } from '../model/message';
+import { HasSubscribers, Publisher, Subscriber, Subscription } from './publisher';
 
 
 export interface SNSOption {

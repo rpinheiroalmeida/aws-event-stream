@@ -3,7 +3,7 @@
 import * as chai from 'chai';
 import 'mocha';
 import { wait, waitUntil } from 'test-wait';
-import { EventStore, EventStream, InMemoryProvider, InMemoryPublisher } from '../../src';
+import { EventStore, EventStream, InMemoryProvider, InMemoryPublisher, } from '../../src';
 
 const expect = chai.expect;
 

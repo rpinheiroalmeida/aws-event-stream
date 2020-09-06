@@ -2,9 +2,11 @@
 
 import AWS = require('aws-sdk');
 const { Consumer } = require('sqs-consumer');
-import { HasSubscribers, Message, Publisher, Subscriber, Subscription } from '@eventstore.net/event.store';
+// import { HasSubscribers, Message, Publisher, Subscriber, Subscription } from '@eventstore.net/event.store';
 import { SQS } from 'aws-sdk';
 import { AWSConfig } from '../aws/config';
+import { Message } from '../model/message';
+import { HasSubscribers, Publisher, Subscriber, Subscription } from './publisher';
 
 /**
  * A Publisher that use SQS to message communications.
