@@ -1,48 +1,20 @@
 
-import AWS = require('aws-sdk');
-import * as chai from 'chai';
-import 'mocha';
-import * as sinon from 'sinon';
-import * as sinonChai from 'sinon-chai';
+'use strict';
+
+import { DynamoDB } from '../../../__mocks__/aws-sdk';
+import { awsSdkPromiseResponse } from '../../../__mocks__/aws-sdk/clients/dynamodb';
 import { Config } from '../../../src/dynamodb/dynamodb-config';
 import { Schema } from '../../../src/dynamodb/schema';
 
-chai.use(sinonChai);
 
-const expect = chai.expect;
+describe('Schema', () => {
 
-// tslint:disable:no-unused-expression
-describe('Config', () => {
-
-    let dynamodbStub: sinon.SinonStub;
-    let createTableStub: sinon.SinonStubbedInstance<any>;
-    let promiseStub: sinon.SinonStubbedInstance<any>;
-    let listTablesStub: sinon.SinonStubbedInstance<any>;
+    const dynamodb = new DynamoDB();
 
     beforeEach(() => {
-
-        createTableStub = sinon.spy((data: any): any => {
-            return {
-                promise: (): any => ({})
-            };
-        });
-
-        promiseStub = sinon.stub();
-        listTablesStub = sinon.spy((data: any): any => {
-            return {
-                promise: promiseStub,
-            };
-        });
-
-        sinon.stub(AWS, "config").returns({ update: (): any => null });
-        dynamodbStub = sinon.stub(AWS, 'DynamoDB').returns({
-            createTable: createTableStub,
-            listTables: listTablesStub,
-        });
-    });
-
-    afterEach(() => {
-        dynamodbStub.restore();
+        dynamodb.createTable.mockClear();
+        dynamodb.listTables.mockClear();
+        awsSdkPromiseResponse.mockClear();
     });
 
     it('should create table with read and write default capacity', async () => {
@@ -52,18 +24,20 @@ describe('Config', () => {
                 tableName: 'events',
             }
         };
-        promiseStub.returns({ TableNames: ['table_a', 'table_b', 'table_c'] });
+        awsSdkPromiseResponse.mockReturnValueOnce(Promise.resolve({ TableNames: ['table_a', 'table_b', 'table_c'] }));
+        expect.assertions(4);
 
         await new Schema(dynamoDBConfig).createTables();
 
-        expect(createTableStub).to.have.been.calledOnce;
-        expect(createTableStub).to.have.been.calledWith({
+        expect(dynamodb.createTable).toHaveBeenCalledTimes(1);
+        expect(dynamodb.createTable).toHaveBeenCalledWith({
             AttributeDefinitions: [{ AttributeName: "aggregation_streamid", AttributeType: "S" }, { AttributeName: "commitTimestamp", AttributeType: "N" }],
             KeySchema: [{ AttributeName: "aggregation_streamid", KeyType: "HASH" }, { AttributeName: "commitTimestamp", KeyType: "RANGE" }],
             ProvisionedThroughput: { ReadCapacityUnits: 1, WriteCapacityUnits: 1 },
             TableName: "events"
         });
-        expect(listTablesStub).to.have.been.calledOnce;
+        expect(dynamodb.listTables).toHaveBeenCalledTimes(1);
+        expect(dynamodb.listTables).toHaveBeenCalledWith({});
     });
 
     it('should create table', async () => {
@@ -75,18 +49,20 @@ describe('Config', () => {
                 writeCapacityUnit: 5,
             }
         };
-        promiseStub.returns({ TableNames: ['table_a', 'table_b', 'table_c'] });
+        awsSdkPromiseResponse.mockReturnValueOnce(Promise.resolve({ TableNames: ['table_a', 'table_b', 'table_c'] }));
+        expect.assertions(4);
 
         await new Schema(dynamoDBConfig).createTables();
 
-        expect(createTableStub).to.have.been.calledOnce;
-        expect(createTableStub).to.have.been.calledWith({
+        expect(dynamodb.createTable).toHaveBeenCalledTimes(1);
+        expect(dynamodb.createTable).toHaveBeenCalledWith({
             AttributeDefinitions: [{ AttributeName: "aggregation_streamid", AttributeType: "S" }, { AttributeName: "commitTimestamp", AttributeType: "N" }],
             KeySchema: [{ AttributeName: "aggregation_streamid", KeyType: "HASH" }, { AttributeName: "commitTimestamp", KeyType: "RANGE" }],
             ProvisionedThroughput: { ReadCapacityUnits: 5, WriteCapacityUnits: 5 },
             TableName: "events"
         });
-        expect(listTablesStub).to.have.been.calledOnce;
+        expect(dynamodb.listTables).toHaveBeenCalledTimes(1);
+        expect(dynamodb.listTables).toHaveBeenCalledWith({});
     });
 
     it('should not create table', async () => {
@@ -96,11 +72,13 @@ describe('Config', () => {
                 tableName: 'events',
             }
         };
-        promiseStub.returns({ TableNames: ['events', 'table_a', 'table_b', 'table_c'] });
+        awsSdkPromiseResponse.mockReturnValueOnce(Promise.resolve({ TableNames: ['events', 'table_a', 'table_b', 'table_c'] }));
+        expect.assertions(3);
 
         await new Schema(dynamoDBConfig).createTables();
 
-        expect(createTableStub).not.have.been.called;
-        expect(listTablesStub).to.have.been.calledOnce;
+        expect(dynamodb.createTable).not.toHaveBeenCalled();
+        expect(dynamodb.listTables).toHaveBeenCalledTimes(1);
+        expect(dynamodb.listTables).toHaveBeenCalledWith({});
     });
 });

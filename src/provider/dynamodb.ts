@@ -1,11 +1,11 @@
 'use strict';
 
-import { DynamoDB } from 'aws-sdk';
 import AWS = require('aws-sdk');
 import { DocumentClient, ItemList, QueryOutput } from 'aws-sdk/clients/dynamodb';
 import * as _ from 'lodash';
 import { Config } from '../dynamodb/dynamodb-config';
 import { Schema } from '../dynamodb/schema';
+// import { Schema } from '../dynamodb/schema';
 import { Event, EventType } from '../model/event';
 import { Stream } from '../model/stream';
 import { PersistenceProvider } from './provider';
@@ -23,7 +23,7 @@ export class DynamodbProvider implements PersistenceProvider {
         this.config = config;
 
         AWS.config.update(config.awsConfig);
-        this.documentClient = new DynamoDB.DocumentClient({ convertEmptyValues: true });
+        this.documentClient = new DocumentClient({ convertEmptyValues: true });
         this.schema = new Schema(this.config);
     }
 
@@ -94,7 +94,6 @@ export class DynamodbProvider implements PersistenceProvider {
     public async getStreams(aggregation: string, offset: number = 0, limit: number = -1): Promise<Array<string>> {
         throw new Error('Method not supported');
     }
-
 
     private async ensureTables() {
         if (!this.initialized && this.config.dynamodb.createTable) {

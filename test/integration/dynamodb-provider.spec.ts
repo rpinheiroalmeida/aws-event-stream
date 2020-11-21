@@ -1,36 +1,36 @@
 'use strict';
 
-import { DynamoDB } from 'aws-sdk';
+jest.deepUnmock('aws-sdk');
+jest.unmock('aws-sdk/clients/dynamodb');
 import AWS = require('aws-sdk');
 import { DocumentClient } from 'aws-sdk/clients/dynamodb';
-import * as chai from 'chai';
-import 'mocha';
-import { DynamodbProvider, EventStore, EventStream } from '../../../src';
+import DynamoDB = require('aws-sdk/clients/dynamodb');
+import { DynamodbProvider, EventStore, EventStream } from '../../src';
+jest.setTimeout(10000);
 
-const expect = chai.expect;
 // tslint:disable:no-unused-expression
 describe('EventStory Dynamodb Provider (Integration)', () => {
     let eventStore: EventStore;
     let ordersStream: EventStream;
     const EVENT_PAYLOAD = 'Event Data';
-    const dynamodbURL = 'http://localhost:8000';
+    const dynamodbURL = 'http://localhost:4566';
     const streamId = '1';
     const aggregation = 'orders';
     AWS.config.update({ region: 'any-region' });
-    const documentClient: DocumentClient = new DynamoDB.DocumentClient({ endpoint: 'http://localhost:8000' });
+    const documentClient: DocumentClient = new DynamoDB.DocumentClient({ endpoint: 'http://localhost:4566' });
 
     const dynamodbConfig = {
         awsConfig: {
             endpoint: dynamodbURL,
-            region: 'any-region',
+            region: 'us-east-1',
         },
         dynamodb: {
             createTable: true,
-            tableName: 'events',
+            tableName: 'events-now',
         }
     };
 
-    before(async () => {
+    beforeAll(async () => {
         eventStore = new EventStore(new DynamodbProvider(dynamodbConfig));
         ordersStream = eventStore.getEventStream(aggregation, streamId);
     });
@@ -43,17 +43,17 @@ describe('EventStory Dynamodb Provider (Integration)', () => {
         await ordersStream.addEvent(EVENT_PAYLOAD);
         const events = await ordersStream.getEvents();
 
-        expect(events.length).to.equal(1);
-        expect(events[0].payload).to.equal(EVENT_PAYLOAD);
-        expect(events[0].sequence).to.equal(0);
+        expect(events.length).toEqual(2);
+        expect(events[0].payload).toEqual(EVENT_PAYLOAD);
+        expect(events[0].sequence).toEqual(0);
     });
 
     it('should be able to add an event to the event stream', async () => {
         const event = await ordersStream.addEvent(EVENT_PAYLOAD);
 
-        expect(event).to.be.not.null;
-        expect(event.commitTimestamp).to.be.not.null;
-        expect(event.sequence).to.be.not.null;
+        expect(event).not.toBeNull();
+        expect(event.commitTimestamp).not.toBeNull();
+        expect(event.sequence).not.toBeNull();
     });
 
     const truncateTable = async (eventStream: EventStream) => {
@@ -64,7 +64,7 @@ describe('EventStory Dynamodb Provider (Integration)', () => {
                     aggregation_streamid: `${eventStream.aggregation}:${eventStream.streamId}`,
                     commitTimestamp: event.commitTimestamp,
                 },
-                TableName: 'events',
+                TableName: 'events-now',
             };
 
             await documentClient.delete(params).promise();
