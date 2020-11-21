@@ -4,8 +4,8 @@ import { DynamoDB } from 'aws-sdk';
 import AWS = require('aws-sdk');
 import { DocumentClient } from 'aws-sdk/clients/dynamodb';
 import * as chai from 'chai';
-import 'mocha';
 import { DynamodbProvider, EventStore, EventStream } from '../../../src';
+import '../../unidade/dynamodb/node_modules/mocha';
 
 const expect = chai.expect;
 // tslint:disable:no-unused-expression

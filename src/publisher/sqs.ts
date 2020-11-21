@@ -1,9 +1,8 @@
 'use strict';
 
+import { SQS } from 'aws-sdk';
 import AWS = require('aws-sdk');
 const { Consumer } = require('sqs-consumer');
-// import { HasSubscribers, Message, Publisher, Subscriber, Subscription } from '@eventstore.net/event.store';
-import { SQS } from 'aws-sdk';
 import { AWSConfig } from '../aws/config';
 import { Message } from '../model/message';
 import { HasSubscribers, Publisher, Subscriber, Subscription } from './publisher';
@@ -17,7 +16,7 @@ export class SQSPublisher implements Publisher, HasSubscribers {
 
     constructor(url: string, awsconfig: AWSConfig) {
         AWS.config.update(awsconfig);
-        this.sqs = new AWS.SQS();
+        this.sqs = new SQS();
         this.url = url;
     }
 
@@ -41,7 +40,8 @@ export class SQSPublisher implements Publisher, HasSubscribers {
             QueueUrl: this.url,
         };
 
-        const messageId = await (await this.sqs.sendMessage(sqsData).promise()).MessageId;
+        const messageId = (await this.sqs.sendMessage(sqsData).promise()).MessageId;
+        console.log(messageId);
         return messageId !== null && messageId !== undefined;
     }
 

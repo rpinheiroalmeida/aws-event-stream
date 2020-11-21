@@ -1,15 +1,7 @@
 'use strict';
 
-import * as chai from 'chai';
-import 'mocha';
-import * as sinon from 'sinon';
-import * as sinonChai from 'sinon-chai';
 import { InMemoryPublisher, Message } from '../../../src';
 
-chai.use(sinonChai);
-const expect = chai.expect;
-
-// tslint:disable:no-unused-expression
 describe('EventStory Memory Publisher', () => {
     const EVENT_PAYLOAD = 'Event Data';
     let memoryPublisher: InMemoryPublisher;
@@ -32,12 +24,12 @@ describe('EventStory Memory Publisher', () => {
             }
         };
 
-        const subscriberStub = sinon.stub();
+        const subscriberStub = jest.fn();
         await memoryPublisher.subscribe('orders', subscriberStub);
         const status = await memoryPublisher.publish(message);
 
-        expect(subscriberStub).to.have.been.calledOnceWithExactly(message);
-        expect(status).to.be.true;
+        expect(subscriberStub).toHaveBeenCalledWith(message);
+        expect(status).toBeTruthy();
     });
 
     it('should be able to notify multiple listeners', async () => {
@@ -53,15 +45,15 @@ describe('EventStory Memory Publisher', () => {
             }
         };
 
-        const subscriberStub = sinon.stub();
-        const subscriber2Stub = sinon.stub();
+        const subscriberStub = jest.fn();
+        const subscriber2Stub = jest.fn();
         await memoryPublisher.subscribe('orders', subscriberStub);
         await memoryPublisher.subscribe('orders', subscriber2Stub);
         const status = await memoryPublisher.publish(message);
 
-        expect(subscriberStub).to.have.been.calledOnceWithExactly(message);
-        expect(subscriber2Stub).to.have.been.calledOnceWithExactly(message);
-        expect(status).to.be.true;
+        expect(subscriberStub).toHaveBeenCalledWith(message);
+        expect(subscriber2Stub).toHaveBeenCalledWith(message);
+        expect(status).toBeTruthy();
     });
 
     it('should be able to check if a message was published', async () => {
@@ -79,6 +71,6 @@ describe('EventStory Memory Publisher', () => {
 
         const status = await memoryPublisher.publish(message);
 
-        expect(status).to.be.false;
+        expect(status).toBeFalsy();
     });
 });
