@@ -5,3 +5,6 @@ dist/
 reports/
 .nyc_output/
 .DS_Store
+.python-version
+.stryker-tmp/
+test-report.xml
