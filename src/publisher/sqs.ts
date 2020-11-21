@@ -41,7 +41,6 @@ export class SQSPublisher implements Publisher, HasSubscribers {
         };
 
         const messageId = (await this.sqs.sendMessage(sqsData).promise()).MessageId;
-        console.log(messageId);
         return messageId !== null && messageId !== undefined;
     }
 

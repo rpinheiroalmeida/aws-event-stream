@@ -28,7 +28,7 @@ export class DynamodbProvider implements PersistenceProvider {
     }
 
     public async addEvent(stream: Stream, data: any): Promise<EventType> {
-        // await this.ensureTables();
+        await this.ensureTables();
         const now = new Date();
         const commitTimestamp = now.getTime();
         const event = {

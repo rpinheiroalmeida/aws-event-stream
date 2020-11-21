@@ -25,6 +25,7 @@
     "pretest": "cross-env NODE_ENV=test npm run build && npm run lint",
     "test": "cross-env NODE_ENV=test mocha --exit",
     "test:integration": "cross-env NODE_ENV=test mocha --opts ./test/mocha-integration.opts --exit",
+    "test:integration:jest": "cross-env NODE_ENV=test jest --config ./test/jest.config.js --silent test/integration",
     "test:unit": "cross-env NODE_ENV=test mocha --opts ./test/mocha-unit.opts --exit",
     "test:unit:jest": "jest --config ./test/jest.config.js --coverage --silent",
     "test:watch": "jest --config ./test/jest.config.js --watch --silent",
