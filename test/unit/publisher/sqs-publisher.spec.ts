@@ -1,7 +1,7 @@
 
 'use strict';
 
-import { awsSdkPromiseResponse, SQS } from '../../../__mocks__/aws-sdk/sqs';
+import { awsSdkPromiseResponse, SQS } from '../../../__mocks__/aws-sdk/clients/sqs';
 import { SQSPublisher } from '../../../src/publisher/sqs';
 
 describe('EventStory SQS Publisher', () => {

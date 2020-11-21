@@ -11,3 +11,4 @@ npm install --save aws-event-stream
 Steps:
 - TMPDIR=/private$TMPDIR docker-compose up
 - npm run test:integration:jest
+- aws dynamodb  --endpoint-url=http://localhost:4566 scan --table-name events-now

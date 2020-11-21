@@ -1,6 +1,6 @@
 'use strict';
 
-import { EventStore, EventStream, InMemoryProvider } from '../../../dist';
+import { EventStore, EventStream, InMemoryProvider } from '../../../src';
 
 
 describe('EventStory Memory Provider', () => {

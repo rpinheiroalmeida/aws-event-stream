@@ -72,6 +72,7 @@ export class DynamodbProvider implements PersistenceProvider {
                 filter = _.merge(filter, { ExclusiveStartKey: exclusiveStartKey });
             }
             const queryOutput: QueryOutput = (await this.documentClient.query(filter).promise());
+            console.log(JSON.stringify(queryOutput));
             exclusiveStartKey = queryOutput.LastEvaluatedKey || null;
             items = items.concat(queryOutput.Items);
         } while (items.length < pageSize);

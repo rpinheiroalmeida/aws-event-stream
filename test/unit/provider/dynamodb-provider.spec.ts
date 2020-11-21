@@ -44,163 +44,225 @@ describe('EventStory Dynamodb Provider', () => {
         schema.mockClear();
     });
 
-    it('should be able to add an Event to the Event Stream', async () => {
+    describe('addEvent', () => {
+        it('should be able to add an Event to the Event Stream', async () => {
 
-        const dynamodbProvider = new DynamodbProvider(dynamodbConfig);
-        await dynamodbProvider.addEvent({ aggregation: 'orders', id: '1' }, 'EVENT PAYLOAD');
-        expect(db.put).toHaveBeenLastCalledWith(
-            {
-                Item: {
-                    aggregation_streamid: 'orders:1',
-                    commitTimestamp: NOW.getTime(),
-                    payload: 'EVENT PAYLOAD',
-                    stream: {
-                        aggregation: 'orders',
-                        id: '1',
+            const dynamodbProvider = new DynamodbProvider(dynamodbConfig);
+            await dynamodbProvider.addEvent({ aggregation: 'orders', id: '1' }, 'EVENT PAYLOAD');
+            expect(db.put).toHaveBeenLastCalledWith(
+                {
+                    Item: {
+                        aggregation_streamid: 'orders:1',
+                        commitTimestamp: NOW.getTime(),
+                        payload: 'EVENT PAYLOAD',
+                        stream: {
+                            aggregation: 'orders',
+                            id: '1',
+                        },
                     },
+                    TableName: 'events',
+                }
+            );
+        });
+
+        it('should be able to add an Event when table does not exist', async () => {
+            const config = {
+                awsConfig: {
+                    region: 'us-east-1',
                 },
-                TableName: 'events',
-            }
-        );
-    });
+                dynamodb: {
+                    createTable: true,
+                    tableName: 'events',
+                },
+            } as Config;
 
-    it('should be able to get the all the events', async () => {
-        awsSdkPromiseResponse.mockReturnValue(Promise.resolve({ Items: [eventItemReturned] }));
 
-        const dynamodbProvider: DynamodbProvider = new DynamodbProvider(dynamodbConfig);
-        const events = await dynamodbProvider.getEvents({ aggregation: 'orders', id: '1' } as Stream);
+            const dynamodbProvider: any = new DynamodbProvider(config);
+            await dynamodbProvider.addEvent({ aggregation: 'orders', id: '1' }, 'EVENT PAYLOAD');
 
-        expect(events).toEqual(
-            [{ commitTimestamp: NOW.getTime(), payload: 'EVENT PAYLOAD', sequence: 0 }]
-        );
-
-        expect(db.query).toBeCalledWith({
-            ExpressionAttributeValues: {
-                ':key': 'orders:1',
-            },
-            KeyConditionExpression: 'aggregation_streamid = :key',
-            ScanIndexForward: false,
-            TableName: 'events',
+            expect(schema).toHaveBeenCalledTimes(1);
+            expect(db.put).toHaveBeenCalledTimes(1);
+            expect(db.put).toHaveBeenCalledWith(
+                {
+                    Item: eventItemReturned,
+                    TableName: "events"
+                }
+            );
         });
     });
 
-    it('should be able to get events paginated', async () => {
-        awsSdkPromiseResponse.mockReturnValue(Promise.resolve({
-            Items: [eventItemReturned, eventItemReturned, eventItemReturned, eventItemReturned, eventItemReturned, eventItemReturned]
-        }));
+    describe('getEvents', () => {
+        it('should be able to get the all the events', async () => {
+            awsSdkPromiseResponse.mockReturnValue(Promise.resolve({ Items: [eventItemReturned] }));
 
-        const dynamodbProvider: DynamodbProvider = new DynamodbProvider(dynamodbConfig);
-        const events = await dynamodbProvider.getEvents({ aggregation: "orders", id: "1" } as Stream, 1, 4);
+            const dynamodbProvider: DynamodbProvider = new DynamodbProvider(dynamodbConfig);
+            const events = await dynamodbProvider.getEvents({ aggregation: 'orders', id: '1' } as Stream);
 
-        expect(events.length).toEqual(4);
-        expect(events).toEqual(
-            [{ commitTimestamp: NOW.getTime(), payload: "EVENT PAYLOAD", sequence: 1 },
-            { commitTimestamp: NOW.getTime(), payload: "EVENT PAYLOAD", sequence: 2 },
-            { commitTimestamp: NOW.getTime(), payload: "EVENT PAYLOAD", sequence: 3 },
-            { commitTimestamp: NOW.getTime(), payload: "EVENT PAYLOAD", sequence: 4 }]
-        );
-        expect(db.query).toHaveBeenCalledTimes(1);
-        expect(db.query).toHaveBeenCalledWith(
-            {
-                ExpressionAttributeValues: { ':key': "orders:1" },
-                KeyConditionExpression: "aggregation_streamid = :key",
-                Limit: 4,
+            expect(events).toEqual(
+                [{ commitTimestamp: NOW.getTime(), payload: 'EVENT PAYLOAD', sequence: 0 }]
+            );
+
+            expect(db.query).toBeCalledWith({
+                ExpressionAttributeValues: {
+                    ':key': 'orders:1',
+                },
+                KeyConditionExpression: 'aggregation_streamid = :key',
                 ScanIndexForward: false,
-                TableName: "events",
-            }
-        );
+                TableName: 'events',
+            });
+        });
+
+        it('should be able to get events paginated', async () => {
+            awsSdkPromiseResponse.mockReturnValue(Promise.resolve({
+                Items: [eventItemReturned, eventItemReturned, eventItemReturned, eventItemReturned, eventItemReturned, eventItemReturned]
+            }));
+
+            const dynamodbProvider: DynamodbProvider = new DynamodbProvider(dynamodbConfig);
+            const events = await dynamodbProvider.getEvents({ aggregation: "orders", id: "1" } as Stream, 1, 4);
+
+            expect(events.length).toEqual(4);
+            expect(events).toEqual(
+                [{ commitTimestamp: NOW.getTime(), payload: "EVENT PAYLOAD", sequence: 1 },
+                { commitTimestamp: NOW.getTime(), payload: "EVENT PAYLOAD", sequence: 2 },
+                { commitTimestamp: NOW.getTime(), payload: "EVENT PAYLOAD", sequence: 3 },
+                { commitTimestamp: NOW.getTime(), payload: "EVENT PAYLOAD", sequence: 4 }]
+            );
+            expect(db.query).toHaveBeenCalledTimes(1);
+            expect(db.query).toHaveBeenCalledWith(
+                {
+                    ExpressionAttributeValues: { ':key': "orders:1" },
+                    KeyConditionExpression: "aggregation_streamid = :key",
+                    Limit: 4,
+                    ScanIndexForward: false,
+                    TableName: "events",
+                }
+            );
+        });
+
+        it('should be able to get events paginated elements from second page', async () => {
+            awsSdkPromiseResponse.mockReturnValueOnce(Promise.resolve(
+                {
+                    Items: [eventItemReturned, eventItemReturned, eventItemReturned, eventItemReturned, eventItemReturned, eventItemReturned,
+                        eventItemReturned, eventItemReturned, eventItemReturned],
+
+                }));
+            expect.assertions(10);
+
+
+            const dynamodbProvider: DynamodbProvider = new DynamodbProvider(dynamodbConfig);
+            const events = await dynamodbProvider.getEvents({ aggregation: "orders", id: "1" } as Stream, 2, 2);
+
+            expect(events.length).toEqual(2);
+            expect(events).toEqual(
+                [{ commitTimestamp: NOW.getTime(), payload: "EVENT PAYLOAD", sequence: 2 },
+                { commitTimestamp: NOW.getTime(), payload: "EVENT PAYLOAD", sequence: 3 }],
+            );
+            expect(db.query).toHaveBeenCalledTimes(1);
+            expect(db.query).toHaveBeenCalledWith(
+                {
+                    ExpressionAttributeValues: { ':key': "orders:1" },
+                    KeyConditionExpression: "aggregation_streamid = :key",
+                    Limit: 2,
+                    ScanIndexForward: false,
+                    TableName: "events",
+                }
+            );
+
+            awsSdkPromiseResponse.mockReturnValueOnce(Promise.resolve(
+                {
+                    Items: [eventItemReturned, eventItemReturned, eventItemReturned, eventItemReturned, eventItemReturned, eventItemReturned,
+                        eventItemReturned, eventItemReturned, eventItemReturned],
+                    LastEvaluatedKey: 2,
+                }));
+
+            const eventsPage3 = await dynamodbProvider.getEvents({ aggregation: "orders", id: "1" } as Stream, 5, 5);
+
+            expect(eventsPage3.length).toEqual(5);
+            expect(eventsPage3).toEqual(
+                [{ commitTimestamp: NOW.getTime(), payload: "EVENT PAYLOAD", sequence: 5 },
+                { commitTimestamp: NOW.getTime(), payload: "EVENT PAYLOAD", sequence: 6 },
+                { commitTimestamp: NOW.getTime(), payload: "EVENT PAYLOAD", sequence: 7 },
+                { commitTimestamp: NOW.getTime(), payload: "EVENT PAYLOAD", sequence: 8 },
+                { commitTimestamp: NOW.getTime(), payload: "EVENT PAYLOAD", sequence: 9 },],
+            );
+            expect(db.query).toHaveBeenCalledTimes(3);
+            expect(db.query).toHaveBeenNthCalledWith(1,
+                {
+                    ExpressionAttributeValues: { ':key': "orders:1" },
+                    KeyConditionExpression: "aggregation_streamid = :key",
+                    Limit: 2,
+                    ScanIndexForward: false,
+                    TableName: "events",
+
+                }
+            );
+            expect(db.query).toHaveBeenNthCalledWith(2,
+                {
+                    ExclusiveStartKey: 2,
+                    ExpressionAttributeValues: { ':key': "orders:1" },
+                    KeyConditionExpression: "aggregation_streamid = :key",
+                    Limit: 5,
+                    ScanIndexForward: false,
+                    TableName: "events",
+                }
+            );
+            expect(db.query).toHaveBeenNthCalledWith(3,
+                {
+                    ExclusiveStartKey: 2,
+                    ExpressionAttributeValues: { ':key': "orders:1" },
+                    KeyConditionExpression: "aggregation_streamid = :key",
+                    Limit: 5,
+                    ScanIndexForward: false,
+                    TableName: "events",
+                }
+            );
+        });
+
+        it('should be able to get all events when table does not exist', async () => {
+            awsSdkPromiseResponse.mockReturnValue(Promise.resolve({
+                Items: [eventItemReturned]
+            }));
+            expect.assertions(4);
+
+            const dynamodbProvider: DynamodbProvider = new DynamodbProvider(dynamodbConfig);
+            const events = await dynamodbProvider.getEvents({ aggregation: "orders", id: "1" } as Stream);
+
+            expect(schema).toHaveBeenCalledTimes(1);
+
+            expect(events).toEqual(
+                [{ commitTimestamp: NOW.getTime(), payload: "EVENT PAYLOAD", sequence: 0 }]
+            );
+            expect(db.query).toHaveBeenCalledTimes(1);
+            expect(db.query).toHaveBeenCalledWith(
+                {
+                    ExpressionAttributeValues: { ':key': "orders:1" },
+                    KeyConditionExpression: "aggregation_streamid = :key",
+                    ScanIndexForward: false,
+                    TableName: "events"
+                }
+            );
+        });
     });
 
-    it('should be able to get events paginated elements from second page', async () => {
-        awsSdkPromiseResponse.mockReturnValue(Promise.resolve({
-            Items: [eventItemReturned, eventItemReturned, eventItemReturned, eventItemReturned, eventItemReturned, eventItemReturned,
-                eventItemReturned, eventItemReturned, eventItemReturned]
-        }));
+    describe('getAggregations', () => {
+        it('should not be implemented', async () => {
+            expect.assertions(1);
 
-        const dynamodbProvider: DynamodbProvider = new DynamodbProvider(dynamodbConfig);
-        const events = await dynamodbProvider.getEvents({ aggregation: "orders", id: "1" } as Stream, 2, 2);
+            const dynamodbProvider: DynamodbProvider = new DynamodbProvider(dynamodbConfig);
 
-        expect(events.length).toEqual(2);
-        expect(events).toEqual(
-            [{ commitTimestamp: NOW.getTime(), payload: "EVENT PAYLOAD", sequence: 2 },
-            { commitTimestamp: NOW.getTime(), payload: "EVENT PAYLOAD", sequence: 3 }],
-        );
-        expect(db.query).toHaveBeenCalledTimes(1);
-        expect(db.query).toHaveBeenCalledWith(
-            {
-                ExpressionAttributeValues: { ':key': "orders:1" },
-                KeyConditionExpression: "aggregation_streamid = :key",
-                Limit: 2,
-                ScanIndexForward: false,
-                TableName: "events",
-            }
-        );
+            expect(async () => await dynamodbProvider.getAggregations()).rejects.toThrow('Method not supported');
+        });
 
-        const eventsPage3 = await dynamodbProvider.getEvents({ aggregation: "orders", id: "1" } as Stream, 3, 2);
-
-        expect(eventsPage3.length).toEqual(2);
-        expect(eventsPage3).toEqual(
-            [{ commitTimestamp: NOW.getTime(), payload: "EVENT PAYLOAD", sequence: 3 },
-            { commitTimestamp: NOW.getTime(), payload: "EVENT PAYLOAD", sequence: 4 }],
-        );
-        expect(db.query).toHaveBeenCalledTimes(2);
-        expect(db.query).toHaveBeenCalledWith(
-            {
-                ExpressionAttributeValues: { ':key': "orders:1" },
-                KeyConditionExpression: "aggregation_streamid = :key",
-                Limit: 2,
-                ScanIndexForward: false,
-                TableName: "events",
-            }
-        );
     });
 
-    it('should be able to add an Event when table does not exist', async () => {
-        const config = {
-            awsConfig: {
-                region: 'us-east-1',
-            },
-            dynamodb: {
-                createTable: true,
-                tableName: 'events',
-            },
-        } as Config;
+    describe('getStreams', () => {
+        it('should not be implemented', async () => {
+            expect.assertions(1);
 
+            const dynamodbProvider: DynamodbProvider = new DynamodbProvider(dynamodbConfig);
 
-        const dynamodbProvider: any = new DynamodbProvider(config);
-        await dynamodbProvider.addEvent({ aggregation: 'orders', id: '1' }, 'EVENT PAYLOAD');
+            expect(async () => await dynamodbProvider.getStreams('')).rejects.toThrow('Method not supported');
+        });
 
-        expect(schema).toHaveBeenCalledTimes(1);
-        expect(db.put).toHaveBeenCalledTimes(1);
-        expect(db.put).toHaveBeenCalledWith(
-            {
-                Item: eventItemReturned,
-                TableName: "events"
-            }
-        );
-    });
-
-    it('should be able to ask dynamodb the all the events when table does not exist', async () => {
-        awsSdkPromiseResponse.mockReturnValue(Promise.resolve({
-            Items: [eventItemReturned]
-        }));
-
-        const dynamodbProvider: DynamodbProvider = new DynamodbProvider(dynamodbConfig);
-        const events = await dynamodbProvider.getEvents({ aggregation: "orders", id: "1" } as Stream);
-
-        expect(schema).toHaveBeenCalledTimes(1);
-
-        expect(events).toEqual(
-            [{ commitTimestamp: NOW.getTime(), payload: "EVENT PAYLOAD", sequence: 0 }]
-        );
-        expect(db.query).toHaveBeenCalledTimes(1);
-        expect(db.query).toHaveBeenCalledWith(
-            {
-                ExpressionAttributeValues: { ':key': "orders:1" },
-                KeyConditionExpression: "aggregation_streamid = :key",
-                ScanIndexForward: false,
-                TableName: "events"
-            }
-        );
     });
 });

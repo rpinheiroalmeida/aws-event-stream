@@ -43,7 +43,7 @@ describe('EventStory Dynamodb Provider (Integration)', () => {
         await ordersStream.addEvent(EVENT_PAYLOAD);
         const events = await ordersStream.getEvents();
 
-        expect(events.length).toEqual(1);
+        expect(events.length).toEqual(2);
         expect(events[0].payload).toEqual(EVENT_PAYLOAD);
         expect(events[0].sequence).toEqual(0);
     });
