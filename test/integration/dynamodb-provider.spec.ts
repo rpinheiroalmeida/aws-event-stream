@@ -16,7 +16,14 @@ describe('EventStory Dynamodb Provider (Integration)', () => {
     const dynamodbURL = 'http://localhost:4566';
     const streamId = '1';
     const aggregation = 'orders';
-    AWS.config.update({ region: 'any-region' });
+    AWS.config.update(
+        {
+            credentials: {
+                accessKeyId: 'aws-event-stream',
+                secretAccessKey: 'aws-event-stream',
+            },
+            region: "us-east-1"
+        });
     const documentClient: DocumentClient = new DynamoDB.DocumentClient({ endpoint: 'http://localhost:4566' });
 
     const dynamodbConfig = {
