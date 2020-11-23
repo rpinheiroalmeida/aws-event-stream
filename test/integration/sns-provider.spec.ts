@@ -2,7 +2,6 @@
 
 jest.deepUnmock('aws-sdk');
 jest.unmock('aws-sdk/clients/dynamodb');
-jest.unmock('aws-sdk/clients/SNS');
 import { SNS } from 'aws-sdk';
 import { SNSPublisher } from '../../src';
 import { getEndpointUrl } from '../../src/util';
