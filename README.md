@@ -12,3 +12,4 @@ Steps:
 - TMPDIR=/private$TMPDIR docker-compose up
 - npm run test:integration:jest
 - aws dynamodb  --endpoint-url=http://localhost:4566 scan --table-name events-now
+- aws sns --endpoint-url=http://localhost:4566 list-topics

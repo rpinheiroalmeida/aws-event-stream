@@ -2,6 +2,7 @@
 import { config, SNS } from 'aws-sdk';
 import { AWSConfig } from '../aws/config';
 import { MessageType } from '../model/message';
+import { getEndpointUrl } from '../util';
 import { HasSubscribers, Publisher, Subscriber, Subscription } from './publisher';
 
 
@@ -18,13 +19,14 @@ export enum Protocols {
  */
 export class SNSPublisher implements Publisher, HasSubscribers {
 
+
     private url: string;
     private sns: SNS;
     private snsOption: SNSOption;
 
     constructor(url: string, awsconfig: AWSConfig, snsOptions?: SNSOption) {
         config.update(awsconfig);
-        this.sns = new SNS();
+        this.sns = new SNS(getEndpointUrl());
         this.url = url;
         this.snsOption = snsOptions;
     }
