@@ -24,7 +24,7 @@
     "postversion": "git push origin master",
     "pretest": "cross-env NODE_ENV=test npm run build && npm run lint",
     "test": "jest --config ./test/jest.config.js --coverage --silent test/unit",
-    "test:integration": "sh ./scripts/run-localstack.sh && cross-env NODE_ENV=test jest --config ./test/jest.config.js --silent test/integration",
+    "test:integration": "sh ./scripts/run-localstack.sh && cross-env NODE_ENV=test jest --config ./test/jest.config.js --silent test/integration && docker-compose stop",
     "test:unit": "jest --config ./test/jest.config.js --coverage --silent test/unit",
     "test:watch": "jest --config ./test/jest.config.js --watch --silent test/unit",
     "test:coverage": "nyc npm test",
