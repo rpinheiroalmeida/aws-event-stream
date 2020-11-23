@@ -1,0 +1,1 @@
+docker-compose -f ./test/integration/docker-compose.yml up -d
