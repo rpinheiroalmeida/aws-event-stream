@@ -6,7 +6,7 @@ module.exports = function (config) {
     testRunner: 'jest',
     jest: {
       projectType: 'custom',
-      config: require('./jest.config.js'),
+      config: require('./jest.config-unit.js'),
       enableFindRelatedTests: true,
     },
     transpilers: [],
