@@ -3,7 +3,9 @@
 jest.deepUnmock('aws-sdk');
 jest.unmock('aws-sdk/clients/dynamodb');
 jest.unmock('aws-sdk/clients/SNS');
+import { SNS } from 'aws-sdk';
 import { SNSPublisher } from '../../src';
+import { getEndpointUrl } from '../../src/util';
 jest.setTimeout(10000);
 
 // tslint:disable:no-unused-expression
@@ -17,9 +19,15 @@ describe('EventStory Dynamodb Provider (Integration)', () => {
         region: "us-east-1"
     };
 
-    const snsPublisher = new SNSPublisher('arn:aws:sns:us-east-1:000000000000:events', awsConfign);
+
 
     it('should be able to get event list from the event stream', async () => {
+        const sns = new SNS(getEndpointUrl());
+        const topicArn = (await sns.createTopic({
+            Name: 'events'
+        }).promise()).TopicArn;
+        const snsPublisher = new SNSPublisher(topicArn, awsConfign);
+
         const published = await snsPublisher.publish({
             event: {
                 eventType: 'SENT',
