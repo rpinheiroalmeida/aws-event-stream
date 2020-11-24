@@ -22,7 +22,7 @@ describe('EventStory Dynamodb Provider (Integration)', () => {
 
     it('should be able to get event list from the event stream', async () => {
         config.update(awsConfign);
-        const sns = new SNS(getEndpointUrl());
+        const sns = new SNS({ endpoint: getEndpointUrl('http://localhost:') });
         const topicArn = (await sns.createTopic({
             Name: 'events'
         }).promise()).TopicArn;
