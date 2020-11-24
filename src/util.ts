@@ -1,6 +1,6 @@
-export const getEndpointUrl = () => {
-    if (process.env.NODE_ENV === 'test') {
-        return { endpoint: 'http://localhost:4566' };
+export const getEndpointUrl = (endpoint?: string) => {
+    if (process.env.NODE_ENV === 'test' && endpoint !== undefined) {
+        return endpoint;
     }
     return undefined;
 };

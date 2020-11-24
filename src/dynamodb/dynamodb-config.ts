@@ -7,5 +7,6 @@ export interface Config {
         createTable?: boolean;
         readCapacityUnit?: number;
         writeCapacityUnit?: number;
+        endpointUrl?: string;
     };
 }

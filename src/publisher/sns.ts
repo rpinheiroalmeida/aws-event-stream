@@ -9,6 +9,7 @@ import { HasSubscribers, Publisher, Subscriber, Subscription } from './publisher
 export interface SNSOption {
     protocol: Protocols;
     endpointSubscriber: string;
+    endpointUrl?: string;
 }
 
 export enum Protocols {
@@ -26,7 +27,8 @@ export class SNSPublisher implements Publisher, HasSubscribers {
 
     constructor(url: string, awsconfig: AWSConfig, snsOptions?: SNSOption) {
         config.update(awsconfig);
-        this.sns = new SNS(getEndpointUrl());
+
+        this.sns = new SNS(this.getEndpointUrl(snsOptions));
         this.url = url;
         this.snsOption = snsOptions;
     }
@@ -72,5 +74,11 @@ export class SNSPublisher implements Publisher, HasSubscribers {
         });
     }
 
+    private getEndpointUrl(snsOption: SNSOption) {
+        if (snsOption !== undefined) {
+            return { endpoint: getEndpointUrl(snsOption.endpointUrl) };
+        }
+        return undefined;
+    }
 
 }

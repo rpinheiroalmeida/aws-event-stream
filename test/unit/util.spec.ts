@@ -5,7 +5,7 @@ describe('util', () => {
         it('should return localhost when NODE_ENV is test', () => {
             process.env.NODE_ENV = 'test';
 
-            expect(getEndpointUrl()).toEqual({ endpoint: 'http://localhost:4566' });
+            expect(getEndpointUrl('http://localhost:4566')).toEqual('http://localhost:4566');
         });
 
         it('should return undefined when NODE_ENV is prd', () => {

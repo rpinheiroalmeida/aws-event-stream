@@ -8,6 +8,7 @@ import { Schema } from '../dynamodb/schema';
 // import { Schema } from '../dynamodb/schema';
 import { Event, EventType } from '../model/event';
 import { Stream } from '../model/stream';
+import { getEndpointUrl } from '../util';
 import { PersistenceProvider } from './provider';
 
 /**
@@ -23,7 +24,11 @@ export class DynamodbProvider implements PersistenceProvider {
         this.config = config;
 
         AWS.config.update(config.awsConfig);
-        this.documentClient = new DocumentClient({ convertEmptyValues: true });
+        this.documentClient = new DocumentClient(
+            {
+                convertEmptyValues: true,
+                endpoint: config !== undefined ? getEndpointUrl(config.dynamodb.endpointUrl) : undefined
+            });
         this.schema = new Schema(this.config);
     }
 
