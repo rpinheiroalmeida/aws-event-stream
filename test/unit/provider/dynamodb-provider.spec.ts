@@ -222,7 +222,7 @@ describe('EventStory Dynamodb Provider', () => {
             awsSdkPromiseResponse.mockReturnValue(Promise.resolve({
                 Items: [eventItemReturned]
             }));
-            expect.assertions(4);
+            // expect.assertions(4);
 
             const dynamodbProvider: DynamodbProvider = new DynamodbProvider(dynamodbConfig);
             const events = await dynamodbProvider.getEvents({ aggregation: "orders", id: "1" } as Stream);

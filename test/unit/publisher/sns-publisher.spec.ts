@@ -52,6 +52,43 @@ describe('EventStory SNS Publisher', () => {
 
         });
 
+        it('should not be able to publish events to sqs when a messageId is null', async () => {
+
+            awsSdkPromiseResponse.mockReturnValueOnce(Promise.resolve({
+                MessageId: null
+            }));
+            expect.assertions(4);
+
+            const snsPublisher = new SNSPublisher('http://local', { region: 'any region' });
+
+            const messageBody = {
+                event: {
+                    commitTimestamp: 1234567,
+                    eventType: 'SENT',
+                    payload: 'anything',
+                    sequence: 1,
+                },
+                stream: { aggregation: 'orders', id: '1' },
+            };
+            const published = await snsPublisher.publish(messageBody);
+
+            expect(sns.publish).toBeCalledTimes(1);
+            expect(published).toBeFalsy();
+            expect(sns.publish).toHaveBeenCalled();
+            expect(sns.publish).toBeCalledWith(
+                {
+                    Message: "{\"event\":{\"commitTimestamp\":1234567,\"eventType\":\"SENT\",\"payload\":\"anything\",\"sequence\":1},\"stream\":{\"aggregation\":\"orders\",\"id\":\"1\"}}",
+                    MessageAttributes: {
+                        eventType: {
+                            DataType: "String",
+                            StringValue: "SENT",
+                        },
+                    },
+                    TopicArn: "http://local",
+                }
+            );
+        });
+
         it('should not be able to publish events to sqs when an no messageId is returned', async () => {
 
             awsSdkPromiseResponse.mockReturnValueOnce(Promise.resolve({}));
