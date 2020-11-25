@@ -45,50 +45,71 @@ describe('EventStory Dynamodb Provider', () => {
     });
 
     describe('addEvent', () => {
-        it('should be able to add an Event to the Event Stream', async () => {
+        describe('should be able to add an Event to the Event Stream', () => {
+            it('when table events exists', async () => {
 
-            const dynamodbProvider = new DynamodbProvider(dynamodbConfig);
-            await dynamodbProvider.addEvent({ aggregation: 'orders', id: '1' }, 'EVENT PAYLOAD');
-            expect(db.put).toHaveBeenLastCalledWith(
-                {
-                    Item: {
-                        aggregation_streamid: 'orders:1',
-                        commitTimestamp: NOW.getTime(),
-                        payload: 'EVENT PAYLOAD',
-                        stream: {
-                            aggregation: 'orders',
-                            id: '1',
+                const dynamodbProvider = new DynamodbProvider(dynamodbConfig);
+                await dynamodbProvider.addEvent({ aggregation: 'orders', id: '1' }, 'EVENT PAYLOAD');
+                expect(db.put).toHaveBeenLastCalledWith(
+                    {
+                        Item: {
+                            aggregation_streamid: 'orders:1',
+                            commitTimestamp: NOW.getTime(),
+                            payload: 'EVENT PAYLOAD',
+                            stream: {
+                                aggregation: 'orders',
+                                id: '1',
+                            },
                         },
+                        TableName: 'events',
+                    }
+                );
+            });
+
+            it('when table does not exist', async () => {
+                const config = {
+                    awsConfig: {
+                        region: 'us-east-1',
                     },
-                    TableName: 'events',
-                }
-            );
+                    dynamodb: {
+                        createTable: true,
+                        tableName: 'events',
+                    },
+                } as Config;
+
+
+                const dynamodbProvider: any = new DynamodbProvider(config);
+                const eventAdded = await dynamodbProvider.addEvent({ aggregation: 'orders', id: '1' }, { payload: 'EVENT PAYLOAD', eventType: 'SENT' });
+
+                expect(eventAdded).toEqual({
+                    commitTimestamp: NOW.getTime(),
+                    eventType: 'SENT',
+                    payload: 'EVENT PAYLOAD',
+                });
+                expect(schema).toBeCalledTimes(1);
+                expect(db.put).toHaveBeenCalledTimes(1);
+                expect(db.put).toHaveBeenCalledWith(
+                    {
+                        Item: {
+                            aggregation_streamid: 'orders:1',
+                            commitTimestamp: NOW.getTime(),
+                            payload: {
+                                eventType: 'SENT',
+                                payload: 'EVENT PAYLOAD',
+                            },
+                            stream: {
+                                aggregation: 'orders',
+                                id: '1',
+                            },
+                        },
+                        TableName: 'events',
+                    }
+                );
+            });
         });
 
-        it('should be able to add an Event when table does not exist', async () => {
-            const config = {
-                awsConfig: {
-                    region: 'us-east-1',
-                },
-                dynamodb: {
-                    createTable: true,
-                    tableName: 'events',
-                },
-            } as Config;
 
 
-            const dynamodbProvider: any = new DynamodbProvider(config);
-            await dynamodbProvider.addEvent({ aggregation: 'orders', id: '1' }, 'EVENT PAYLOAD');
-
-            expect(schema).toHaveBeenCalledTimes(1);
-            expect(db.put).toHaveBeenCalledTimes(1);
-            expect(db.put).toHaveBeenCalledWith(
-                {
-                    Item: eventItemReturned,
-                    TableName: "events"
-                }
-            );
-        });
     });
 
     describe('getEvents', () => {

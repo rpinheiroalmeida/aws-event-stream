@@ -13,7 +13,7 @@ module.exports = function (config) {
     coverageAnalysis: 'off',
     tsconfigFile: 'tsconfig-stryker.json',
     mutate: ['src/**/*.ts'],
-    thresholds: { break: 70 },
+    thresholds: { break: 65 },
     timeoutMS: 35000
   });
 };
