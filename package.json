@@ -1,6 +1,6 @@
 {
   "name": "aws-event-stream",
-  "version": "1.0.11",
+  "version": "1.0.12",
   "description": "A simple and fast EventStore for AWS.",
   "author": "Rodrigo Pinheiro de Almeida <rpinheiroalmeida@gmail.com>",
   "license": "MIT",
