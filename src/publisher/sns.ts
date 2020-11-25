@@ -7,8 +7,8 @@ import { HasSubscribers, Publisher, Subscriber, Subscription } from './publisher
 
 
 export interface SNSOption {
-    protocol: Protocols;
-    endpointSubscriber: string;
+    protocol?: Protocols;
+    endpointSubscriber?: string;
     endpointUrl?: string;
 }
 

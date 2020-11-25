@@ -4,7 +4,6 @@ jest.deepUnmock('aws-sdk');
 jest.unmock('aws-sdk/clients/dynamodb');
 import { config, SNS } from 'aws-sdk';
 import { SNSPublisher } from '../../src';
-import { getEndpointUrl } from '../../src/util';
 jest.setTimeout(10000);
 
 // tslint:disable:no-unused-expression
@@ -22,11 +21,11 @@ describe('EventStory Dynamodb Provider (Integration)', () => {
 
     it('should be able to get event list from the event stream', async () => {
         config.update(awsConfign);
-        const sns = new SNS({ endpoint: getEndpointUrl('http://localhost:') });
+        const sns = new SNS({ endpoint: ('http://localhost:4566') });
         const topicArn = (await sns.createTopic({
             Name: 'events'
         }).promise()).TopicArn;
-        const snsPublisher = new SNSPublisher(topicArn, awsConfign);
+        const snsPublisher = new SNSPublisher(topicArn, awsConfign, { endpointUrl: 'http://localhost:4566' });
 
         const published = await snsPublisher.publish({
             event: {

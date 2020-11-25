@@ -24,7 +24,7 @@ describe('EventStory Dynamodb Provider (Integration)', () => {
             },
             region: "us-east-1"
         });
-    const documentClient: DocumentClient = new DynamoDB.DocumentClient({ endpoint: 'http://localhost:4566' });
+    const documentClient: DocumentClient = new DynamoDB.DocumentClient({ endpoint: dynamodbURL });
 
     const dynamodbConfig = {
         awsConfig: {
@@ -33,6 +33,7 @@ describe('EventStory Dynamodb Provider (Integration)', () => {
         },
         dynamodb: {
             createTable: true,
+            endpointUrl: dynamodbURL,
             tableName: 'events-now',
         }
     };
