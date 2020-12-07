@@ -20,7 +20,7 @@ export class SQSPublisher implements Publisher, HasSubscribers {
         this.url = url;
     }
 
-    public async publish(message: Message): Promise<boolean> {
+    public async publish(message: Message): Promise<string> {
         const sqsData = {
             MessageAttributes: {
                 "aggregation": {
@@ -40,8 +40,8 @@ export class SQSPublisher implements Publisher, HasSubscribers {
             QueueUrl: this.url,
         };
 
-        const messageId = (await this.sqs.sendMessage(sqsData).promise()).MessageId;
-        return messageId !== null && messageId !== undefined;
+        return (await this.sqs.sendMessage(sqsData).promise()).MessageId;
+
     }
 
     public async subscribe(aggregation: string, subscriber: Subscriber): Promise<Subscription> {
