@@ -57,11 +57,12 @@ describe('EventStory', () => {
         const subscription = await eventStore.subscribe(ordersStream.aggregation, message => {
             count++;
         });
-        await ordersStream.addEvent(EVENT_PAYLOAD);
+        const eventAdded = await ordersStream.addEvent(EVENT_PAYLOAD);
         await waitUntil(() => count === 1);
         await subscription.remove();
         await ordersStream.addEvent(EVENT_PAYLOAD);
         await wait(100);
         expect(count).toEqual(1);
+        expect(eventAdded.id).not.toBeNull();
     });
 });

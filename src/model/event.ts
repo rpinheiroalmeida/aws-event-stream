@@ -16,6 +16,8 @@ export interface Event {
     sequence?: number;
 
     type?: string;
+
+    id?: string;
 }
 
 export interface EventType extends Event {

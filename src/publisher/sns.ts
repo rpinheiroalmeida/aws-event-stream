@@ -33,7 +33,7 @@ export class SNSPublisher implements Publisher, HasSubscribers {
         this.snsOption = snsOptions;
     }
 
-    public async publish(message: MessageType): Promise<boolean> {
+    public async publish(message: MessageType): Promise<string> {
         const snsData = {
             Message: JSON.stringify(message),
             MessageAttributes: {
@@ -45,8 +45,7 @@ export class SNSPublisher implements Publisher, HasSubscribers {
             TopicArn: this.url,
         };
 
-        const messageId = await (await this.sns.publish(snsData).promise()).MessageId;
-        return messageId !== null && messageId !== undefined;
+        return (await this.sns.publish(snsData).promise()).MessageId;
     }
 
     public async subscribe(_: string, __: Subscriber): Promise<Subscription> {

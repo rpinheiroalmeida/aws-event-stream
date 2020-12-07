@@ -12,12 +12,12 @@ export class InMemoryPublisher implements Publisher, HasSubscribers {
 
     public async publish(message: Message) {
         const aggregationListeners = this.listeners.get(message.stream.aggregation);
-        let notified = false;
+
         if (aggregationListeners != null && aggregationListeners.length) {
-            notified = true;
             aggregationListeners.forEach(subscriber => subscriber(message));
+            return new Date().getTime().toString();
         }
-        return notified;
+        return null;
     }
 
     public async subscribe(aggregation: string, subscriber: Subscriber): Promise<Subscription> {

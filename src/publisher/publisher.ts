@@ -12,7 +12,7 @@ export interface Publisher {
      * Publish the publisher to all subscribers
      * @param message The Message to be published
      */
-    publish(message: Message): Promise<boolean>;
+    publish(message: Message): Promise<string>;
 }
 
 

@@ -48,12 +48,16 @@ export class EventStreamImpl implements EventStream {
      * @return The event, updated with informations like its sequence order and commitTimestamp
      */
     public async addEvent(data: any, type?: string) {
-        const addedEvent: Event = await this.getProvider().addEvent(this.stream, data, type);
+        let addedEvent: Event = await this.getProvider().addEvent(this.stream, data, type);
         if (this.eventStore.publisher) {
-            await (this.eventStore.publisher as Publisher).publish({
+            const eventId = await (this.eventStore.publisher as Publisher).publish({
                 event: addedEvent,
                 stream: this.stream
             });
+            addedEvent = {
+                ...addedEvent,
+                id: eventId,
+            };
         }
         return addedEvent;
     }
