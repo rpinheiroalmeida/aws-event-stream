@@ -15,7 +15,7 @@ export const eventMerge = (events: Array<Event>) => {
     };
 
     const history = (events.reduceRight(reduce) as any);
-    delete history.eventType
+    delete history.eventType;
     history.eventTypes = eventTypes;
     return history;
-}
+};
