@@ -11,7 +11,6 @@ import { PersistenceProvider } from './provider/provider';
 import { InMemoryPublisher } from './publisher/memory';
 import { HasSubscribers, Publisher, Subscriber, Subscription } from './publisher/publisher';
 import { SNSPublisher } from './publisher/sns';
-import { SQSPublisher } from './publisher/sqs';
 
 export { PersistenceProvider };
 
@@ -25,7 +24,6 @@ export { HasSubscribers };
 export { Subscriber };
 export { Subscription };
 export { InMemoryPublisher };
-export { SQSPublisher };
 export { SNSPublisher };
 export { DynamodbProvider };
 export { InMemoryProvider };
