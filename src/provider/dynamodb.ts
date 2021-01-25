@@ -40,6 +40,7 @@ export class DynamodbProvider implements PersistenceProvider {
             aggregation_streamid: `${this.getKey(stream)}`,
             commitTimestamp: commitTimestamp,
             payload: data,
+            eventType: data.eventType,
             stream: stream
         };
         const record = {
@@ -85,11 +86,31 @@ export class DynamodbProvider implements PersistenceProvider {
             return {
                 commitTimestamp: data.commitTimestamp,
                 payload: data.payload,
+                eventType: data.eventType || (data.payload as any).eventType,
                 sequence: index,
             } as Event;
         });
 
         return pageSize === -1 ? events.slice(offset) : events.slice(offset, pageSize);
+    }
+
+    public async loadFromHistory(stream: Stream, offset: number = 0, limit: number = -1): Promise<any> {
+        const events = await this.getEvents(stream, offset, limit);
+
+        const eventTypes = events.map((event) => {
+            const eventType = event.payload.eventType || event.eventType;
+            event.eventType = undefined;
+            return eventType;
+        });
+
+        const reduce = (result: any, entry: any): any => {
+            entry.eventType = undefined;
+            return _.merge(result, entry);
+        };
+
+        const history = (events.reduce(reduce) as any);
+        history.eventTypes = eventTypes;
+        return history;
     }
 
     public async getAggregations(offset: number = 0, limit: number = -1): Promise<Array<string>> {

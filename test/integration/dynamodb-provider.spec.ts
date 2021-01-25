@@ -12,7 +12,7 @@ jest.setTimeout(10000);
 describe('EventStory Dynamodb Provider (Integration)', () => {
     let eventStore: EventStore;
     let ordersStream: EventStream;
-    const EVENT_PAYLOAD = 'Event Data';
+    const EVENT_PAYLOAD = { eventType: 'SENT', text: 'Event Data' };
     const dynamodbURL = 'http://localhost:4566';
     const streamId = '1';
     const aggregation = 'orders';

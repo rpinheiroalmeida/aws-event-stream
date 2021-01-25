@@ -15,7 +15,7 @@ export interface Event {
      */
     sequence?: number;
 
-    type?: string;
+    eventType?: string;
 
     id?: string;
 }

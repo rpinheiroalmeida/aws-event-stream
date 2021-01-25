@@ -27,6 +27,7 @@ describe('EventStory Dynamodb Provider', () => {
     const eventItemReturned = {
         aggregation_streamid: 'orders:1',
         commitTimestamp: NOW.getTime(),
+        eventType: 'SENT',
         payload: 'EVENT PAYLOAD',
         stream: { aggregation: 'orders', id: '1' }
     };
@@ -46,6 +47,29 @@ describe('EventStory Dynamodb Provider', () => {
 
     describe('addEvent', () => {
         describe('should be able to add an Event to the Event Stream', () => {
+            it('when the eventType property is present in the Event', async () => {
+                const dynamodbProvider = new DynamodbProvider(dynamodbConfig);
+                await dynamodbProvider.addEvent({ aggregation: 'orders', id: '1' }, { text: 'EVENT PAYLOAD', eventType: 'SENT' });
+                expect(db.put).toHaveBeenLastCalledWith(
+                    {
+                        Item: {
+                            aggregation_streamid: 'orders:1',
+                            commitTimestamp: NOW.getTime(),
+                            eventType: 'SENT',
+                            payload: {
+                                eventType: 'SENT',
+                                text: 'EVENT PAYLOAD'
+                            },
+                            stream: {
+                                aggregation: 'orders',
+                                id: '1',
+                            },
+                        },
+                        TableName: 'events',
+                    }
+                );
+            });
+
             it('when table events exists', async () => {
 
                 const dynamodbProvider = new DynamodbProvider(dynamodbConfig);
@@ -93,6 +117,7 @@ describe('EventStory Dynamodb Provider', () => {
                         Item: {
                             aggregation_streamid: 'orders:1',
                             commitTimestamp: NOW.getTime(),
+                            eventType: 'SENT',
                             payload: {
                                 eventType: 'SENT',
                                 payload: 'EVENT PAYLOAD',
@@ -113,14 +138,37 @@ describe('EventStory Dynamodb Provider', () => {
     });
 
     describe('getEvents', () => {
-        it('should be able to get the all the events', async () => {
-            awsSdkPromiseResponse.mockReturnValue(Promise.resolve({ Items: [eventItemReturned] }));
+        it('should be able to get the all the events when eventType does not exist', async () => {
+            const eventItemReturnedWithoutEventType = { ...eventItemReturned };
+            eventItemReturnedWithoutEventType.eventType = undefined;
+            awsSdkPromiseResponse.mockReturnValue(Promise.resolve({ Items: [eventItemReturnedWithoutEventType] }));
 
             const dynamodbProvider: DynamodbProvider = new DynamodbProvider(dynamodbConfig);
             const events = await dynamodbProvider.getEvents({ aggregation: 'orders', id: '1' } as Stream);
 
             expect(events).toEqual(
                 [{ commitTimestamp: NOW.getTime(), payload: 'EVENT PAYLOAD', sequence: 0 }]
+            );
+
+            expect(db.query).toBeCalledWith({
+                ExpressionAttributeValues: {
+                    ':key': 'orders:1',
+                },
+                KeyConditionExpression: 'aggregation_streamid = :key',
+                ScanIndexForward: false,
+                TableName: 'events',
+            });
+        });
+
+        it('should be able to get the all the events', async () => {
+
+            awsSdkPromiseResponse.mockReturnValue(Promise.resolve({ Items: [eventItemReturned] }));
+
+            const dynamodbProvider: DynamodbProvider = new DynamodbProvider(dynamodbConfig);
+            const events = await dynamodbProvider.getEvents({ aggregation: 'orders', id: '1' } as Stream);
+
+            expect(events).toEqual(
+                [{ commitTimestamp: NOW.getTime(), eventType: 'SENT', payload: 'EVENT PAYLOAD', sequence: 0 }]
             );
 
             expect(db.query).toBeCalledWith({
@@ -143,10 +191,10 @@ describe('EventStory Dynamodb Provider', () => {
 
             expect(events.length).toEqual(4);
             expect(events).toEqual(
-                [{ commitTimestamp: NOW.getTime(), payload: "EVENT PAYLOAD", sequence: 1 },
-                { commitTimestamp: NOW.getTime(), payload: "EVENT PAYLOAD", sequence: 2 },
-                { commitTimestamp: NOW.getTime(), payload: "EVENT PAYLOAD", sequence: 3 },
-                { commitTimestamp: NOW.getTime(), payload: "EVENT PAYLOAD", sequence: 4 }]
+                [{ commitTimestamp: NOW.getTime(), eventType: 'SENT', payload: "EVENT PAYLOAD", sequence: 1 },
+                { commitTimestamp: NOW.getTime(), eventType: 'SENT', payload: "EVENT PAYLOAD", sequence: 2 },
+                { commitTimestamp: NOW.getTime(), eventType: 'SENT', payload: "EVENT PAYLOAD", sequence: 3 },
+                { commitTimestamp: NOW.getTime(), eventType: 'SENT', payload: "EVENT PAYLOAD", sequence: 4 }]
             );
             expect(db.query).toHaveBeenCalledTimes(1);
             expect(db.query).toHaveBeenCalledWith(
@@ -175,8 +223,8 @@ describe('EventStory Dynamodb Provider', () => {
 
             expect(events.length).toEqual(2);
             expect(events).toEqual(
-                [{ commitTimestamp: NOW.getTime(), payload: "EVENT PAYLOAD", sequence: 2 },
-                { commitTimestamp: NOW.getTime(), payload: "EVENT PAYLOAD", sequence: 3 }],
+                [{ commitTimestamp: NOW.getTime(), eventType: 'SENT', payload: "EVENT PAYLOAD", sequence: 2 },
+                { commitTimestamp: NOW.getTime(), eventType: 'SENT', payload: "EVENT PAYLOAD", sequence: 3 }],
             );
             expect(db.query).toHaveBeenCalledTimes(1);
             expect(db.query).toHaveBeenCalledWith(
@@ -200,11 +248,11 @@ describe('EventStory Dynamodb Provider', () => {
 
             expect(eventsPage3.length).toEqual(5);
             expect(eventsPage3).toEqual(
-                [{ commitTimestamp: NOW.getTime(), payload: "EVENT PAYLOAD", sequence: 5 },
-                { commitTimestamp: NOW.getTime(), payload: "EVENT PAYLOAD", sequence: 6 },
-                { commitTimestamp: NOW.getTime(), payload: "EVENT PAYLOAD", sequence: 7 },
-                { commitTimestamp: NOW.getTime(), payload: "EVENT PAYLOAD", sequence: 8 },
-                { commitTimestamp: NOW.getTime(), payload: "EVENT PAYLOAD", sequence: 9 },],
+                [{ commitTimestamp: NOW.getTime(), eventType: 'SENT', payload: "EVENT PAYLOAD", sequence: 5 },
+                { commitTimestamp: NOW.getTime(), eventType: 'SENT', payload: "EVENT PAYLOAD", sequence: 6 },
+                { commitTimestamp: NOW.getTime(), eventType: 'SENT', payload: "EVENT PAYLOAD", sequence: 7 },
+                { commitTimestamp: NOW.getTime(), eventType: 'SENT', payload: "EVENT PAYLOAD", sequence: 8 },
+                { commitTimestamp: NOW.getTime(), eventType: 'SENT', payload: "EVENT PAYLOAD", sequence: 9 },],
             );
             expect(db.query).toHaveBeenCalledTimes(3);
             expect(db.query).toHaveBeenNthCalledWith(1,
@@ -251,7 +299,7 @@ describe('EventStory Dynamodb Provider', () => {
             expect(schema).toHaveBeenCalledTimes(1);
 
             expect(events).toEqual(
-                [{ commitTimestamp: NOW.getTime(), payload: "EVENT PAYLOAD", sequence: 0 }]
+                [{ commitTimestamp: NOW.getTime(), eventType: 'SENT', payload: "EVENT PAYLOAD", sequence: 0 }]
             );
             expect(db.query).toHaveBeenCalledTimes(1);
             expect(db.query).toHaveBeenCalledWith(
@@ -262,6 +310,90 @@ describe('EventStory Dynamodb Provider', () => {
                     TableName: "events"
                 }
             );
+        });
+    });
+
+    describe('loadEventsFromHistory', () => {
+        it('when there is only one event', async () => {
+            const eventSent = {
+                aggregation_streamid: 'orders:1',
+                commitTimestamp: NOW.getTime(),
+                payload: {
+                    eventType: 'SENT',
+                    amount: 123,
+                },
+                stream: { aggregation: 'orders', id: '1' }
+            };
+
+            awsSdkPromiseResponse.mockReturnValue(Promise.resolve({ Items: [eventSent] }));
+
+            const dynamodbProvider: DynamodbProvider = new DynamodbProvider(dynamodbConfig);
+            const events = await dynamodbProvider.loadFromHistory({ aggregation: 'orders', id: '1' } as Stream);
+
+            expect(events).toEqual(
+                {
+                    eventTypes: ['SENT'],
+                    commitTimestamp: NOW.getTime(), payload: {
+                        eventType: 'SENT',
+                        amount: 123,
+                    }, sequence: 0
+                }
+            );
+
+            expect(db.query).toBeCalledWith({
+                ExpressionAttributeValues: {
+                    ':key': 'orders:1',
+                },
+                KeyConditionExpression: 'aggregation_streamid = :key',
+                ScanIndexForward: false,
+                TableName: 'events',
+            });
+        });
+
+        it('when there is more than one event', async () => {
+            const eventSent = {
+                aggregation_streamid: 'orders:1',
+                commitTimestamp: NOW.getTime(),
+                payload: {
+                    eventType: 'SENT',
+                    amount: 123,
+                },
+                stream: { aggregation: 'orders', id: '1' }
+            };
+            const eventOrderPlaced = {
+                aggregation_streamid: 'orders:1',
+                commitTimestamp: NOW.getTime(),
+                payload: {
+                    eventType: 'PLACED',
+                    amount: 456,
+                },
+                stream: { aggregation: 'orders', id: '1' }
+            };
+
+            awsSdkPromiseResponse.mockReturnValue(Promise.resolve({ Items: [eventSent, eventOrderPlaced] }));
+
+            const dynamodbProvider: DynamodbProvider = new DynamodbProvider(dynamodbConfig);
+            const events = await dynamodbProvider.loadFromHistory({ aggregation: 'orders', id: '1' } as Stream);
+
+            expect(events).toEqual(
+                {
+                    commitTimestamp: NOW.getTime(),
+                    eventTypes: ['SENT', 'PLACED'],
+                    payload: {
+                        eventType: 'PLACED',
+                        amount: 456,
+                    }, sequence: 1
+                }
+            );
+
+            expect(db.query).toBeCalledWith({
+                ExpressionAttributeValues: {
+                    ':key': 'orders:1',
+                },
+                KeyConditionExpression: 'aggregation_streamid = :key',
+                ScanIndexForward: false,
+                TableName: 'events',
+            });
         });
     });
 
