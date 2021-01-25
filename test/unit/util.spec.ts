@@ -1,3 +1,5 @@
+'use strict';
+
 import { getEndpointUrl } from '../../src/util';
 
 describe('util', () => {
@@ -20,4 +22,5 @@ describe('util', () => {
             expect(getEndpointUrl()).toBeUndefined();
         });
     });
+
 });

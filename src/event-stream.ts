@@ -3,6 +3,7 @@ import { Event } from './model/event';
 import { Stream } from './model/stream';
 import { PersistenceProvider } from './provider/provider';
 import { Publisher } from './publisher/publisher';
+import { eventMerge } from './model/event-util';
 
 /**
  * An Event Stream
@@ -39,6 +40,18 @@ export class EventStreamImpl implements EventStream {
      */
     public getEvents(offset?: number, limit?: number): Promise<Array<Event>> {
         return this.getProvider().getEvents(this.stream, offset, limit);
+    }
+
+    /**
+     * Rertieve only one object containing all the events's data in the stream in order.
+     * @param offset The start position in the stream list
+     * @param limit The desired quantity events
+     * @return All the events
+     */
+    public async loadFromHistory(offset?: number, limit?: number): Promise<Event> {
+        const events = await this.getEvents(offset, limit);
+
+        return eventMerge(events);
     }
 
     /**

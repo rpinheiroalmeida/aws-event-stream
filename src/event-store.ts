@@ -95,6 +95,15 @@ export interface EventStream {
      * @return All the events
      */
     getEvents(offset?: number, limit?: number): Promise<Array<Event>>;
+
+    /**
+     * Rertieve only one object containing all the events's data in the stream in order.
+     * @param offset The start position in the stream list
+     * @param limit The desired quantity events
+     * @return All the events
+     */
+    loadFromHistory(offset?: number, limit?: number): Promise<Event>;
+
     /**
      * Add a new event to the end of the event stream.
      * @param data The event data
