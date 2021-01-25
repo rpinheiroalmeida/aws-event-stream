@@ -6,7 +6,7 @@
 It is an open source library to create Event Stores that works with AWS using DynamoDB as Provider and SNS to publish messages.
 
 [![npm version](https://badge.fury.io/js/aws-event-stream.svg)](https://badge.fury.io/js/aws-event-stream)
-![Master Workflow](https://github.com/rpinheiroalmeida/aws-event-stream/workflows/Master%20Workflow/badge.svg)![Mutation Tests Workflow](https://github.com/rpinheiroalmeida/aws-event-stream/workflows/Mutation%20Tests%20Workflow/badge.svg)![Publish Workflow](https://github.com/rpinheiroalmeida/aws-event-stream/workflows/Publish%20Workflow/badge.svg)
+![Master Workflow](https://github.com/rpinheiroalmeida/aws-event-stream/workflows/Master%20Workflow/badge.svg) ![Mutation Tests Workflow](https://github.com/rpinheiroalmeida/aws-event-stream/workflows/Mutation%20Tests%20Workflow/badge.svg) ![Publish Workflow](https://github.com/rpinheiroalmeida/aws-event-stream/workflows/Publish%20Workflow/badge.svg)
 
 
 ## Motivation
