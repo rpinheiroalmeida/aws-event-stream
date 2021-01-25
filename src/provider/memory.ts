@@ -14,9 +14,9 @@ export class InMemoryProvider implements PersistenceProvider {
         const currentEvents = await this.getEventsList(stream.aggregation, stream.id);
         const event: Event = {
             commitTimestamp: new Date().getTime(),
+            eventType: type,
             payload: data,
             sequence: currentEvents.length,
-            eventType: type
         };
         currentEvents.push(event);
         return event;

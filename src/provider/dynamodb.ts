@@ -5,7 +5,6 @@ import { DocumentClient, ItemList, QueryOutput } from 'aws-sdk/clients/dynamodb'
 import * as _ from 'lodash';
 import { Config } from '../dynamodb/dynamodb-config';
 import { Schema } from '../dynamodb/schema';
-// import { Schema } from '../dynamodb/schema';
 import { Event, EventType } from '../model/event';
 import { Stream } from '../model/stream';
 import { getEndpointUrl } from '../util';
@@ -39,8 +38,8 @@ export class DynamodbProvider implements PersistenceProvider {
         const event = {
             aggregation_streamid: `${this.getKey(stream)}`,
             commitTimestamp: commitTimestamp,
-            payload: data,
             eventType: data.eventType,
+            payload: data,
             stream: stream
         };
         const record = {
@@ -85,8 +84,8 @@ export class DynamodbProvider implements PersistenceProvider {
         const events = items.map((data, index) => {
             return {
                 commitTimestamp: data.commitTimestamp,
-                payload: data.payload,
                 eventType: data.eventType || (data.payload as any).eventType,
+                payload: data.payload,
                 sequence: index,
             } as Event;
         });
