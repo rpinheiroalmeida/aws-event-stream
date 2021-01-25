@@ -71,7 +71,7 @@ const events = await orderStream.getEvents();
 ```
 Example of event from **getEvents** method:
 
-```json
+```javascript
 [
     { 
         'commitTimestamp': 1611206813, 
