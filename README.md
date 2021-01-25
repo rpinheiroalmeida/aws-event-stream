@@ -97,7 +97,7 @@ await orderStream.loadFromHistory();
 
 Example of event from **loadFromHistory** method:
 
-```json
+```javascript
     { 
         'commitTimestamp': 1611206823, 
         'eventTypes': ['SENT', 'PLACED'], 
