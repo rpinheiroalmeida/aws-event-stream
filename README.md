@@ -75,7 +75,7 @@ Example of event from **getEvents** method:
 [
     { 
         'commitTimestamp': 1611206813, 
-        'eventType': 'SENT', 
+        'eventType': 'PLACED', 
         'payload': {'text': 'EVENT PAYLOAD', 'sequence': 1 }
     },
     { 
