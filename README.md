@@ -75,12 +75,12 @@ Example of event from **getEvents** method:
 [
     { 
         'commitTimestamp': 1611206813, 
-        'eventType': 'PLACED', 
+        'eventType': 'SENT', 
         'payload': {'text': 'EVENT PAYLOAD', 'sequence': 1 }
     },
     { 
         'commitTimestamp': 1611206823, 
-        'eventType': 'SENT', 
+        'eventType': 'PLACED', 
         'payload': {'text': 'EVENT PAYLOAD', 'sequence': 2 }
     }
 ]
@@ -88,7 +88,9 @@ Example of event from **getEvents** method:
 
 Or
 
-Returns an Object with all data from events happened in a Stream. What happens is a merge in all fields from all events, keeping the eventTypes as an array 
+Returns an Object with all data from events happened in a Stream. What happens is a merge in all fields from all events, keeping the eventTypes as an array.
+
+The fields which have conflicts will always be considered the last event.
 
 ```javascript
 const orderStream = eventStore.getEventStream('orders', '123');
