@@ -7,7 +7,6 @@ import { Config } from '../dynamodb/dynamodb-config';
 import { Schema } from '../dynamodb/schema';
 import { Event, EventType } from '../model/event';
 import { Stream } from '../model/stream';
-import { getEndpointUrl } from '../util';
 import { PersistenceProvider } from './provider';
 
 /**
@@ -26,7 +25,9 @@ export class DynamodbProvider implements PersistenceProvider {
         this.documentClient = new DocumentClient(
             {
                 convertEmptyValues: true,
-                endpoint: config !== undefined ? getEndpointUrl(config.dynamodb.endpointUrl) : undefined
+                endpoint: config.dynamodb.endpointUrl,
+                httpOptions: config.dynamodb.httpOptions,
+                maxRetries: config.dynamodb.maxRetries     
             });
         this.schema = new Schema(this.config);
     }

@@ -1,3 +1,4 @@
+import { HTTPOptions } from "aws-sdk";
 import { AWSConfig } from "../aws/config";
 
 export interface Config {
@@ -8,5 +9,7 @@ export interface Config {
         readCapacityUnit?: number;
         writeCapacityUnit?: number;
         endpointUrl?: string;
+        maxRetries?: number;
+        httpOptions?: HTTPOptions;
     };
 }

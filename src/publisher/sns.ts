@@ -2,7 +2,6 @@
 import { config, SNS } from 'aws-sdk';
 import { AWSConfig } from '../aws/config';
 import { MessageType } from '../model/message';
-import { getEndpointUrl } from '../util';
 import { HasSubscribers, Publisher, Subscriber, Subscription } from './publisher';
 
 
@@ -28,7 +27,9 @@ export class SNSPublisher implements Publisher, HasSubscribers {
     constructor(url: string, awsconfig: AWSConfig, snsOptions?: SNSOption) {
         config.update(awsconfig);
 
-        this.sns = new SNS(this.getEndpointUrl(snsOptions));
+        this.sns = new SNS(
+            snsOptions ? { endpoint: snsOptions.endpointUrl } : undefined
+        );
         this.url = url;
         this.snsOption = snsOptions;
     }
@@ -72,12 +73,4 @@ export class SNSPublisher implements Publisher, HasSubscribers {
             }
         });
     }
-
-    private getEndpointUrl(snsOption: SNSOption) {
-        if (snsOption !== undefined) {
-            return { endpoint: getEndpointUrl(snsOption.endpointUrl) };
-        }
-        return undefined;
-    }
-
 }
