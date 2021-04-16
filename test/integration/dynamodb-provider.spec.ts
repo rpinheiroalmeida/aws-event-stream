@@ -34,7 +34,7 @@ describe('EventStory Dynamodb Provider (Integration)', () => {
         dynamodb: {
             createTable: true,
             endpointUrl: dynamodbURL,
-            tableName: 'events-now',
+            tableName: 'events-now'
         }
     };
 
