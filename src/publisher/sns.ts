@@ -1,5 +1,5 @@
 
-import { config, SNS } from 'aws-sdk';
+import { config, HTTPOptions, SNS } from 'aws-sdk';
 import { AWSConfig } from '../aws/config';
 import { MessageType } from '../model/message';
 import { HasSubscribers, Publisher, Subscriber, Subscription } from './publisher';
@@ -9,6 +9,8 @@ export interface SNSOption {
     protocol?: Protocols;
     endpointSubscriber?: string;
     endpointUrl?: string;
+    maxRetries?: number;
+    httpOptions?: HTTPOptions;
 }
 
 export enum Protocols {
@@ -28,7 +30,9 @@ export class SNSPublisher implements Publisher, HasSubscribers {
         config.update(awsconfig);
 
         this.sns = new SNS(
-            snsOptions ? { endpoint: snsOptions.endpointUrl } : undefined
+            snsOptions ? { endpoint: snsOptions.endpointUrl, 
+                httpOptions: snsOptions.httpOptions, 
+                maxRetries: snsOptions.maxRetries } : undefined
         );
         this.url = url;
         this.snsOption = snsOptions;
