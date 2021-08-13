@@ -27,7 +27,7 @@ export class DynamodbProvider implements PersistenceProvider {
                 convertEmptyValues: true,
                 endpoint: config.dynamodb.endpointUrl,
                 httpOptions: config.dynamodb.httpOptions,
-                maxRetries: config.dynamodb.maxRetries     
+                maxRetries: config.dynamodb.maxRetries
             });
         this.schema = new Schema(this.config);
     }
@@ -41,7 +41,8 @@ export class DynamodbProvider implements PersistenceProvider {
             commitTimestamp: commitTimestamp,
             eventType: data.eventType,
             payload: data,
-            stream: stream
+            stream: stream,
+            ttl: this.config.dynamodb.ttl ? (commitTimestamp + this.config.dynamodb.ttl) : undefined,
         };
         const record = {
             Item: event,
@@ -85,6 +86,7 @@ export class DynamodbProvider implements PersistenceProvider {
             return {
                 commitTimestamp: data.commitTimestamp,
                 eventType: data.eventType || (data.payload as any).eventType,
+                ttl: data.ttl,
                 payload: data.payload,
                 sequence: index,
             } as Event;

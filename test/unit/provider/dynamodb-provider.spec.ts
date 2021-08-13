@@ -70,6 +70,39 @@ describe('EventStory Dynamodb Provider', () => {
                 );
             });
 
+            it('when the ttl property is settled in the table', async () => {
+                const dynamodbConfig = {
+                    awsConfig: {
+                        region: 'us-east-1',
+                    },
+                    dynamodb: {
+                        tableName: 'events',
+                        ttl: 10,
+                    },
+                } as Config;
+                const dynamodbProvider = new DynamodbProvider(dynamodbConfig);
+                await dynamodbProvider.addEvent({ aggregation: 'orders', id: '1' }, { text: 'EVENT PAYLOAD', eventType: 'SENT' });
+                expect(db.put).toHaveBeenLastCalledWith(
+                    {
+                        Item: {
+                            aggregation_streamid: 'orders:1',
+                            commitTimestamp: NOW.getTime(),
+                            eventType: 'SENT',
+                            ttl: NOW.getTime() + 10,
+                            payload: {
+                                eventType: 'SENT',
+                                text: 'EVENT PAYLOAD'
+                            },
+                            stream: {
+                                aggregation: 'orders',
+                                id: '1',
+                            },
+                        },
+                        TableName: 'events',
+                    }
+                );
+            });
+
             it('when table events exists', async () => {
 
                 const dynamodbProvider = new DynamodbProvider(dynamodbConfig);

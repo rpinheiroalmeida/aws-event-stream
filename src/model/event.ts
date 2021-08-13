@@ -18,6 +18,8 @@ export interface Event {
     eventType?: string;
 
     id?: string;
+
+    ttl?: number;
 }
 
 export interface EventType extends Event {

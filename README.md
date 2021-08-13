@@ -48,6 +48,25 @@ const eventStore = new EventStore(
 
 ```
 
+#### DynamodbConfig
+
+The object DynamodbConfig is related to Dynamodb configuration, the possible parameters are:
+
+| Parameter  | Description |
+
+
+| Parameter         |                              Description                               |
+| ----------------- | :--------------------------------------------------------------------: |
+| tableName         |                         The name of the table.                         |
+| createTable       |    True: create the table, False assume that table alreaday exists.    |
+| readCapacityUnit  |   The total number of read capacity units consumed by the operation.   |
+| writeCapacityUnit |  The total number of write capacity units consumed by the operation.   |
+| endpointUrl       | An Endpoint object representing the endpoint URL for service requests. |
+| maxRetries        |        The maximum amount of retries to attempt with a request.        |
+| httpOptions       |        A set of options to pass to the low-level HTTP request.         |
+| ttl               |               Time to Live (TTL) on the specified table.               |
+
+
 ### Adding Events
 
 To add Events you need to ask to EventStore a reference to an EventStream. You can add Events passing anything you want as a payload. 
@@ -56,6 +75,7 @@ To add Events you need to ask to EventStore a reference to an EventStream. You c
 const orderStream = eventStore.getEventStream('orders', '123');
 await orderStream.addEvent({ data: 'any data', eventType: 'PLACED' });
 ```
+
 
 ### Reading Events
 
@@ -106,6 +126,7 @@ Example of event from **loadFromHistory** method:
         'payload': {'text': "EVENT PAYLOAD", 'eventType': 'PLACED'}, 'sequence': 2 
     }
 ```
+
 
 
 ## Integration Test

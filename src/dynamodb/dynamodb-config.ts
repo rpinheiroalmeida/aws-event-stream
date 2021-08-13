@@ -11,5 +11,6 @@ export interface Config {
         endpointUrl?: string;
         maxRetries?: number;
         httpOptions?: HTTPOptions;
+        ttl?: number;
     };
 }
