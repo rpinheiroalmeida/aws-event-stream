@@ -65,7 +65,7 @@ describe('EventStory Dynamodb Provider (Integration)', () => {
     });
 
     it.only('should be able to add an event to the event stream when ttl is settled', async () => {
-        const dynamodbConfig = {
+        const newDynamodbConfig = {
             awsConfig: {
                 endpoint: dynamodbURL,
                 region: 'us-east-1',
@@ -77,20 +77,20 @@ describe('EventStory Dynamodb Provider (Integration)', () => {
                 ttl: 10
             }
         };
-        eventStore = new EventStore(new DynamodbProvider(dynamodbConfig));
+        eventStore = new EventStore(new DynamodbProvider(newDynamodbConfig));
         ordersStream = eventStore.getEventStream(aggregation, streamId);
 
         await ordersStream.addEvent(EVENT_PAYLOAD);
         const events = await ordersStream.getEvents();
 
-        expect(events).not.toBeNull()
-        expect(events.length).toEqual(1)
-        expect(events[0].commitTimestamp).not.toBeNull()
-        expect(events[0].eventType).not.toBeNull()
-        expect(events[0].id).not.toBeNull()
-        expect(events[0].sequence).not.toBeNull()
-        expect(events[0].ttl).not.toBeNull()
-        expect(events[0].payload).not.toBeNull()
+        expect(events).not.toBeNull();
+        expect(events.length).toEqual(1);
+        expect(events[0].commitTimestamp).not.toBeNull();
+        expect(events[0].eventType).not.toBeNull();
+        expect(events[0].id).not.toBeNull();
+        expect(events[0].sequence).not.toBeNull();
+        expect(events[0].ttl).not.toBeNull();
+        expect(events[0].payload).not.toBeNull();
     });
 
     const truncateTable = async (eventStream: EventStream) => {
