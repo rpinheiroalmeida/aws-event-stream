@@ -1,4 +1,3 @@
-
 'use strict';
 
 jest.mock('../../../src/dynamodb/schema');
@@ -9,6 +8,7 @@ import { Stream } from '../../../src/model/stream';
 
 const schema: jest.Mock = Schema as any;
 
+jest.useFakeTimers();
 describe('EventStory Dynamodb Provider', () => {
 
 
@@ -34,16 +34,16 @@ describe('EventStory Dynamodb Provider', () => {
 
     const db = new DocumentClient();
 
-    beforeAll(() => {
-        spyOn(global, 'Date').and.callFake(() => NOW);
-    });
-
     beforeEach(() => {
         db.get.mockClear();
         db.put.mockClear();
         db.query.mockClear();
         schema.mockClear();
     });
+
+    afterAll(() => {
+        jest.useRealTimers();
+    })
 
     describe('addEvent', () => {
         describe('should be able to add an Event to the Event Stream', () => {
