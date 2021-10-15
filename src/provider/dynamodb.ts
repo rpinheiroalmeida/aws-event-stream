@@ -36,13 +36,14 @@ export class DynamodbProvider implements PersistenceProvider {
         await this.ensureTables();
         const now = new Date();
         const commitTimestamp = now.getTime();
+        const commitTimetampSeconds = Math.floor(commitTimestamp / 1000);
         const event = {
             aggregation_streamid: `${this.getKey(stream)}`,
             commitTimestamp: commitTimestamp,
             eventType: data.eventType,
             payload: data,
             stream: stream,
-            ttl: this.config.dynamodb.ttl ? (commitTimestamp + this.config.dynamodb.ttl) : undefined,
+            ttl: this.config.dynamodb.ttl ? (commitTimetampSeconds + this.config.dynamodb.ttl) : undefined,
         };
         const record = {
             Item: event,

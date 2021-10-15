@@ -88,7 +88,7 @@ describe('EventStory Dynamodb Provider', () => {
                             aggregation_streamid: 'orders:1',
                             commitTimestamp: NOW.getTime(),
                             eventType: 'SENT',
-                            ttl: NOW.getTime() + 10,
+                            ttl: Math.floor(NOW.getTime() / 1000) + 10,
                             payload: {
                                 eventType: 'SENT',
                                 text: 'EVENT PAYLOAD'
