@@ -64,7 +64,7 @@ The object DynamodbConfig is related to Dynamodb configuration, the possible par
 | endpointUrl       | An Endpoint object representing the endpoint URL for service requests. |
 | maxRetries        |        The maximum amount of retries to attempt with a request.        |
 | httpOptions       |        A set of options to pass to the low-level HTTP request.         |
-| ttl               |               Time to Live (TTL) on the specified table.               |
+| ttl               |         Time to Live (TTL) in seconds on the specified table.          |
 
 
 ### Adding Events
