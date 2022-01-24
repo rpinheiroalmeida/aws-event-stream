@@ -1,6 +1,6 @@
 {
   "name": "aws-event-stream",
-  "version": "1.2.6",
+  "version": "1.2.7",
   "description": "A simple and fast EventStore for AWS.",
   "author": "Rodrigo Pinheiro de Almeida <rpinheiroalmeida@gmail.com>",
   "license": "MIT",
@@ -28,7 +28,7 @@
     "test:unit": "jest --config ./test/jest.config.js --coverage --silent test/unit",
     "test:watch": "jest --config ./test/jest.config.js --watch --silent test/unit",
     "test:coverage": "nyc npm test",
-    "test:mutation": "stryker run ./test/stryker.conf.js",
+    "test:mutation": "stryker run ./test/stryker.conf.json",
     "stryker:init": "stryker init",
     "tsc": "tsc"
   },
