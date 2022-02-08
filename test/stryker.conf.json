@@ -10,7 +10,7 @@
     "jest": {
         "projectType": "custom",
         "enableFindRelatedTests": true,
-        "configFile": "./test/jest.config.js"
+        "configFile": "./test/jest.config-unit.js"
     },
     "coverageAnalysis": "off",
     "mutate": [
@@ -24,12 +24,5 @@
     "checkers": [
         "typescript"
     ],
-    "tsconfigFile": "tsconfig.json",
-    "include": [
-        "src/**/*.ts"
-    ],
-    "exclude": [
-        "node_modules",
-        "test/integration/*"
-    ]
+    "tsconfigFile": "tsconfig.json"
 }
