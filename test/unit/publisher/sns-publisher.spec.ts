@@ -166,7 +166,7 @@ describe('EventStory SNS Publisher', () => {
             const snsPublisher = new SNSPublisher('http://local', { region: 'any region' });
             expect.assertions(1);
 
-            expect(snsPublisher.subscribe('', null)).rejects.toThrowError('SNSOption is required to subscriber');
+            await expect(async () => await snsPublisher.subscribe('', null)).rejects.toThrowError('SNSOption is required to subscriber');
 
         });
 
@@ -179,7 +179,31 @@ describe('EventStory SNS Publisher', () => {
 
             const snsPublisher = new SNSPublisher('http://local', { region: 'any region' }, snsOption);
 
-            expect(snsPublisher.subscribe('', null)).rejects.toThrowError('Protocol and endpoint subscriber does not match');
+            await expect(async () => await snsPublisher.subscribe('', null)).rejects.toThrowError('Protocol and endpoint subscriber does not match');
+        });
+
+        it('when subscribe url is incorrect', async () => {
+            const snsOption: SNSOption = {
+                endpointSubscriber: 'https/subscriber.url',
+                protocol: Protocols.HTTPS,
+            };
+            expect.assertions(1);
+
+            const snsPublisher = new SNSPublisher('http://local', { region: 'any region' }, snsOption);
+
+            await expect(async () => await snsPublisher.subscribe('', null)).rejects.toThrowError('Protocol and endpoint subscriber does not match');
+        });
+
+        it('when the protocol in the middle of the url is incorrect', async () => {
+            const snsOption: SNSOption = {
+                endpointSubscriber: 'subscriber.https://.url',
+                protocol: Protocols.HTTPS,
+            };
+            expect.assertions(1);
+
+            const snsPublisher = new SNSPublisher('http://local', { region: 'any region' }, snsOption);
+
+            await expect(async () => await snsPublisher.subscribe('', null)).rejects.toThrowError('Protocol and endpoint subscriber does not match');
         });
 
         it('should subscribe with success', async () => {
@@ -187,32 +211,20 @@ describe('EventStory SNS Publisher', () => {
                 endpointSubscriber: 'https://localhost',
                 protocol: Protocols.HTTPS,
             };
-            expect.assertions(2);
+            expect.assertions(3);
 
             const snsPublisher = new SNSPublisher('http://local', { region: 'any region' }, snsOption);
             const result = await snsPublisher.subscribe('', null);
 
             expect(result).not.toBeUndefined();
+            expect(sns.subscribe).toBeCalledWith({
+                Endpoint: "https://localhost",
+                Protocol: "https",
+                TopicArn: "http://local",
+            });
             result.remove();
 
             expect(sns.unsubscribe).toBeCalled();
         });
     });
-
-
-    // it('should be able to subscribe to listen changes in the eventstore', async () => {
-    //     const sqsPublisher = new SQSPublisher('http://local', { region: 'any region' });
-
-    //     const subscriberOrdersStub = jest.fn();
-    //     const consumer = await sqsPublisher.subscribe('orders', subscriberOrdersStub);
-
-    //     const consumerExpected = {
-    //         handleMessage: subscriberOrdersStub,
-    //         queueUrl: 'http://local',
-    //     };
-    //     expect(consumerStub).toHaveBeenCalled();
-    //     expect(consumerStub).toHaveBeenCalledWith(consumerExpected);
-    //     expect(startConsumerStub.start).toHaveBeenCalled();
-    //     expect(consumer).toEqual(startConsumerStub);
-    // });
 });

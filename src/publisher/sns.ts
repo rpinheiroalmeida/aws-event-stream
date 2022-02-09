@@ -58,7 +58,7 @@ export class SNSPublisher implements Publisher, HasSubscribers {
             throw new Error('SNSOption is required to subscriber');
         }
 
-        const protocolRegex = RegExp(this.snsOption.protocol + ':', 'g');
+        const protocolRegex = RegExp(`^${this.snsOption.protocol}:`);
         if (!protocolRegex.exec(this.snsOption.endpointSubscriber)) {
             throw new Error('Protocol and endpoint subscriber does not match');
         }
