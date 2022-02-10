@@ -46,7 +46,7 @@ describe('EventStory Dynamodb Provider (Integration)', () => {
     });
 
     beforeEach(async () => {
-        const schema = new Schema(dynamodbConfig)
+        const schema = new Schema(dynamodbConfig);
         await schema.createTables();
         await truncateTable(ordersStream);
     });
