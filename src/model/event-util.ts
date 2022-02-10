@@ -1,6 +1,5 @@
 'use strict';
 
-import * as _ from 'lodash';
 import { Event } from './event';
 
 export const eventMerge = (events: Array<Event>) => {
@@ -11,7 +10,7 @@ export const eventMerge = (events: Array<Event>) => {
 
     const reduce = (result: any, entry: any): any => {
         entry.eventType = undefined;
-        return _.merge(result, entry);
+        return { ...result, ...entry };
     };
 
     const history = (events.reduceRight(reduce) as any);

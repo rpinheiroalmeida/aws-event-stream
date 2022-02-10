@@ -1,4 +1,3 @@
-import * as _ from 'lodash';
 import { Event } from '../model/event';
 import { Stream } from '../model/stream';
 import { PersistenceProvider } from './provider';
@@ -24,19 +23,24 @@ export class InMemoryProvider implements PersistenceProvider {
 
     public async getEvents(stream: Stream, offset = 0, limit?: number) {
         const history = this.getEventsList(stream.aggregation, stream.id);
-        return _(history).drop(offset).take(limit || history.length).value();
+        return this.take(history.slice(offset), limit || history.length);
     }
 
     public async getAggregations(offset = 0, limit?: number): Promise<Array<string>> {
         const keys = Array.from(this.store.keys());
-        return _(keys).sort().drop(offset).take(limit || this.store.size).value();
+
+        return this.take(keys.sort().slice(offset), (limit || this.store.size));
+    }
+
+    private take(array: any[], n: number = 1) {
+        return array.slice(0, n < 0 ? 0 : n)
     }
 
     public async getStreams(aggregation: string, offset = 0, limit?: number): Promise<Array<string>> {
         const streams = this.store.get(aggregation);
         if (streams) {
             const keys = Array.from(streams.keys());
-            return _(keys).sort().drop(offset).take(limit || this.store.size).value();
+            return this.take(keys.sort().slice(offset), limit || this.store.size);
         }
         return [];
     }

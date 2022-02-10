@@ -1,4 +1,3 @@
-import * as _ from 'lodash';
 import { EventStreamImpl } from './event-stream';
 import { Event } from './model/event';
 import { PersistenceProvider } from './provider/provider';
@@ -18,7 +17,7 @@ export class EventStore implements EventStore, HasSubscribers {
     }
 
     public get provider(): PersistenceProvider {
-        if (_.isNil(this.persistenceProvider)) {
+        if (!this.persistenceProvider) {
             throw new Error('No Provider configured in EventStore.');
         }
         return this.persistenceProvider;

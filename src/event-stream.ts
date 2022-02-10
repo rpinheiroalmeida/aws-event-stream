@@ -49,9 +49,7 @@ export class EventStreamImpl implements EventStream {
      * @return All the events
      */
     public async loadFromHistory(offset?: number, limit?: number): Promise<Event> {
-        const events = await this.getEvents(offset, limit);
-
-        return eventMerge(events);
+        return eventMerge(await this.getEvents(offset, limit));
     }
 
     /**
