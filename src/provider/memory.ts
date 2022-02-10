@@ -32,10 +32,6 @@ export class InMemoryProvider implements PersistenceProvider {
         return this.take(keys.sort().slice(offset), (limit || this.store.size));
     }
 
-    private take(array: any[], n: number = 1) {
-        return array.slice(0, n < 0 ? 0 : n)
-    }
-
     public async getStreams(aggregation: string, offset = 0, limit?: number): Promise<Array<string>> {
         const streams = this.store.get(aggregation);
         if (streams) {
@@ -43,6 +39,10 @@ export class InMemoryProvider implements PersistenceProvider {
             return this.take(keys.sort().slice(offset), limit || this.store.size);
         }
         return [];
+    }
+
+    private take(array: Array<any>, n: number = 1) {
+        return array.slice(0, n < 0 ? 0 : n);
     }
 
     private getEventsList(aggregation: string, streamId: string) {
