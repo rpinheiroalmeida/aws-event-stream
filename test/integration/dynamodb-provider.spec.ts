@@ -6,6 +6,8 @@ import AWS = require('aws-sdk');
 import { DocumentClient } from 'aws-sdk/clients/dynamodb';
 import DynamoDB = require('aws-sdk/clients/dynamodb');
 import { DynamodbProvider, EventStore, EventStream } from '../../src';
+import { Schema } from './schema';
+
 jest.setTimeout(10000);
 
 // tslint:disable:no-unused-expression
@@ -44,6 +46,8 @@ describe('EventStory Dynamodb Provider (Integration)', () => {
     });
 
     beforeEach(async () => {
+        const schema = new Schema(dynamodbConfig)
+        await schema.createTables();
         await truncateTable(ordersStream);
     });
 
@@ -64,7 +68,7 @@ describe('EventStory Dynamodb Provider (Integration)', () => {
         expect(event.sequence).not.toBeNull();
     });
 
-    it.only('should be able to add an event to the event stream when ttl is settled', async () => {
+    it('should be able to add an event to the event stream when ttl is settled', async () => {
         const newDynamodbConfig = {
             awsConfig: {
                 endpoint: dynamodbURL,

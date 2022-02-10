@@ -1,16 +1,11 @@
 'use strict';
 
-jest.mock('../../../src/dynamodb/schema');
 import { awsSdkPromiseResponse, DocumentClient } from '../../../__mocks__/aws-sdk/clients/dynamodb';
 import { Config, DynamodbProvider } from '../../../src';
-import { Schema } from '../../../src/dynamodb/schema';
 import { Stream } from '../../../src/model/stream';
-
-const schema: jest.Mock = Schema as any;
 
 jest.useFakeTimers();
 describe('EventStory Dynamodb Provider', () => {
-
 
     const NOW = new Date();
 
@@ -38,7 +33,6 @@ describe('EventStory Dynamodb Provider', () => {
         db.get.mockClear();
         db.put.mockClear();
         db.query.mockClear();
-        schema.mockClear();
     });
 
     afterAll(() => {
@@ -143,7 +137,6 @@ describe('EventStory Dynamodb Provider', () => {
                     eventType: 'SENT',
                     payload: 'EVENT PAYLOAD',
                 });
-                expect(schema).toBeCalledTimes(1);
                 expect(db.put).toHaveBeenCalledTimes(1);
                 expect(db.put).toHaveBeenCalledWith(
                     {
@@ -241,6 +234,28 @@ describe('EventStory Dynamodb Provider', () => {
             );
         });
 
+        it('should be able to get the all the events when page is 0', async () => {
+
+            awsSdkPromiseResponse.mockReturnValue(Promise.resolve({ Items: [eventItemReturned] }));
+
+            const dynamodbProvider: DynamodbProvider = new DynamodbProvider(dynamodbConfig);
+            const events = await dynamodbProvider.getEvents({ aggregation: 'orders', id: '1' } as Stream,
+                0, 0);
+
+            expect(events).toEqual(
+                [{ commitTimestamp: NOW.getTime(), eventType: 'SENT', payload: 'EVENT PAYLOAD', sequence: 0 }]
+            );
+
+            expect(db.query).toBeCalledWith({
+                ExpressionAttributeValues: {
+                    ':key': 'orders:1',
+                },
+                KeyConditionExpression: 'aggregation_streamid = :key',
+                ScanIndexForward: false,
+                TableName: 'events',
+            });
+        });
+
         it('should be able to get events paginated elements from second page', async () => {
             awsSdkPromiseResponse.mockReturnValueOnce(Promise.resolve(
                 {
@@ -295,7 +310,6 @@ describe('EventStory Dynamodb Provider', () => {
                     Limit: 2,
                     ScanIndexForward: false,
                     TableName: "events",
-
                 }
             );
             expect(db.query).toHaveBeenNthCalledWith(2,
@@ -324,12 +338,9 @@ describe('EventStory Dynamodb Provider', () => {
             awsSdkPromiseResponse.mockReturnValue(Promise.resolve({
                 Items: [eventItemReturned]
             }));
-            // expect.assertions(4);
 
             const dynamodbProvider: DynamodbProvider = new DynamodbProvider(dynamodbConfig);
             const events = await dynamodbProvider.getEvents({ aggregation: "orders", id: "1" } as Stream);
-
-            expect(schema).toHaveBeenCalledTimes(1);
 
             expect(events).toEqual(
                 [{ commitTimestamp: NOW.getTime(), eventType: 'SENT', payload: "EVENT PAYLOAD", sequence: 0 }]
@@ -352,7 +363,7 @@ describe('EventStory Dynamodb Provider', () => {
 
             const dynamodbProvider: DynamodbProvider = new DynamodbProvider(dynamodbConfig);
 
-            expect(async () => await dynamodbProvider.getAggregations()).rejects.toThrow('Method not supported');
+            await expect(async () => await dynamodbProvider.getAggregations()).rejects.toThrow('Method not supported');
         });
 
     });
@@ -363,8 +374,9 @@ describe('EventStory Dynamodb Provider', () => {
 
             const dynamodbProvider: DynamodbProvider = new DynamodbProvider(dynamodbConfig);
 
-            expect(async () => await dynamodbProvider.getStreams('')).rejects.toThrow('Method not supported');
+            await expect(async () => await dynamodbProvider.getStreams('')).rejects.toThrow('Method not supported');
         });
 
     });
 });
+

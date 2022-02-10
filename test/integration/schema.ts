@@ -1,6 +1,6 @@
 import AWS = require('aws-sdk');
 import DynamoDB = require("aws-sdk/clients/dynamodb");
-import { Config } from './dynamodb-config';
+import { Config } from '../../src/dynamodb/dynamodb-config';
 
 export class Schema {
     private dynamoDB: DynamoDB;

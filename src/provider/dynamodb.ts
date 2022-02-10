@@ -4,7 +4,6 @@ import AWS = require('aws-sdk');
 import { DocumentClient, ItemList, QueryOutput } from 'aws-sdk/clients/dynamodb';
 import * as _ from 'lodash';
 import { Config } from '../dynamodb/dynamodb-config';
-import { Schema } from '../dynamodb/schema';
 import { Event, EventType } from '../model/event';
 import { Stream } from '../model/stream';
 import { PersistenceProvider } from './provider';
@@ -15,8 +14,6 @@ import { PersistenceProvider } from './provider';
 export class DynamodbProvider implements PersistenceProvider {
     private documentClient: DocumentClient;
     private config: Config;
-    private initialized: boolean;
-    private schema: Schema;
 
     constructor(config: Config) {
         this.config = config;
@@ -29,11 +26,9 @@ export class DynamodbProvider implements PersistenceProvider {
                 httpOptions: config.dynamodb.httpOptions,
                 maxRetries: config.dynamodb.maxRetries
             });
-        this.schema = new Schema(this.config);
     }
 
     public async addEvent(stream: Stream, data: any): Promise<EventType> {
-        await this.ensureTables();
         const now = new Date();
         const commitTimestamp = now.getTime();
         const commitTimetampSeconds = Math.floor(commitTimestamp / 1000);
@@ -60,7 +55,6 @@ export class DynamodbProvider implements PersistenceProvider {
     }
 
     public async getEvents(stream: Stream, offset: number = 0, limit: number = -1): Promise<Array<Event>> {
-        await this.ensureTables();
         let exclusiveStartKey: any;
         let filter = {
             ExpressionAttributeValues: { ':key': this.getKey(stream) },
@@ -75,9 +69,7 @@ export class DynamodbProvider implements PersistenceProvider {
 
         let items: ItemList = [];
         do {
-            if (exclusiveStartKey) {
-                filter = _.merge(filter, { ExclusiveStartKey: exclusiveStartKey });
-            }
+            filter = _.merge(filter, { ExclusiveStartKey: exclusiveStartKey });
             const queryOutput: QueryOutput = (await this.documentClient.query(filter).promise());
             exclusiveStartKey = queryOutput.LastEvaluatedKey || null;
             items = items.concat(queryOutput.Items);
@@ -93,7 +85,7 @@ export class DynamodbProvider implements PersistenceProvider {
             } as Event;
         });
 
-        return pageSize === -1 ? events.slice(offset) : events.slice(offset, pageSize);
+        return pageSize <= 0 ? events.slice(offset) : events.slice(offset, pageSize);
     }
 
     public async getAggregations(offset: number = 0, limit: number = -1): Promise<Array<string>> {
@@ -102,13 +94,6 @@ export class DynamodbProvider implements PersistenceProvider {
 
     public async getStreams(aggregation: string, offset: number = 0, limit: number = -1): Promise<Array<string>> {
         throw new Error('Method not supported');
-    }
-
-    private async ensureTables() {
-        if (!this.initialized && this.config.dynamodb.createTable) {
-            await this.schema.createTables();
-            this.initialized = true;
-        }
     }
 
     private getKey(stream: Stream): string {
