@@ -256,15 +256,13 @@ describe('EventStory Dynamodb Provider', () => {
             });
         });
 
-        it('should be able to get events paginated elements from second page', async () => {
+        it('should be able to get events paginated elements from first page', async () => {
             awsSdkPromiseResponse.mockReturnValueOnce(Promise.resolve(
                 {
                     Items: [eventItemReturned, eventItemReturned, eventItemReturned, eventItemReturned, eventItemReturned, eventItemReturned,
                         eventItemReturned, eventItemReturned, eventItemReturned],
 
                 }));
-            expect.assertions(10);
-
 
             const dynamodbProvider: DynamodbProvider = new DynamodbProvider(dynamodbConfig);
             const events = await dynamodbProvider.getEvents({ aggregation: "orders", id: "1" } as Stream, 2, 2);
@@ -285,73 +283,66 @@ describe('EventStory Dynamodb Provider', () => {
                 }
             );
 
+            awsSdkPromiseResponse.mockClear();
+            db.query.mockClear();
+
             awsSdkPromiseResponse.mockReturnValueOnce(Promise.resolve(
                 {
-                    Items: [eventItemReturned, eventItemReturned, eventItemReturned, eventItemReturned, eventItemReturned, eventItemReturned,
-                        eventItemReturned, eventItemReturned, eventItemReturned],
-                    LastEvaluatedKey: 2,
+                    Items: [eventItemReturned, eventItemReturned, eventItemReturned, eventItemReturned, eventItemReturned],
+                    LastEvaluatedKey: 5,
+                }));
+            awsSdkPromiseResponse.mockReturnValueOnce(Promise.resolve(
+                {
+                    Items: [eventItemReturned, eventItemReturned, eventItemReturned, eventItemReturned, eventItemReturned],
+                    LastEvaluatedKey: 9,
                 }));
 
-            const eventsPage3 = await dynamodbProvider.getEvents({ aggregation: "orders", id: "1" } as Stream, 5, 5);
+        });
 
-            expect(eventsPage3.length).toEqual(5);
-            expect(eventsPage3).toEqual(
+
+        it('should be able to get events paginated elements from second page', async () => {
+
+            awsSdkPromiseResponse.mockReturnValueOnce(Promise.resolve(
+                {
+                    Items: [eventItemReturned, eventItemReturned, eventItemReturned, eventItemReturned, eventItemReturned],
+                    LastEvaluatedKey: 5,
+                }));
+            awsSdkPromiseResponse.mockReturnValueOnce(Promise.resolve(
+                {
+                    Items: [eventItemReturned, eventItemReturned, eventItemReturned, eventItemReturned, eventItemReturned],
+                    LastEvaluatedKey: 9,
+                }));
+
+            const dynamodbProvider: DynamodbProvider = new DynamodbProvider(dynamodbConfig);
+
+            const eventsPage = await dynamodbProvider.getEvents({ aggregation: "orders", id: "1" } as Stream, 5, 5);
+
+            expect(eventsPage.length).toEqual(5);
+            expect(eventsPage).toEqual(
                 [{ commitTimestamp: NOW.getTime(), eventType: 'SENT', payload: "EVENT PAYLOAD", sequence: 5 },
                 { commitTimestamp: NOW.getTime(), eventType: 'SENT', payload: "EVENT PAYLOAD", sequence: 6 },
                 { commitTimestamp: NOW.getTime(), eventType: 'SENT', payload: "EVENT PAYLOAD", sequence: 7 },
                 { commitTimestamp: NOW.getTime(), eventType: 'SENT', payload: "EVENT PAYLOAD", sequence: 8 },
                 { commitTimestamp: NOW.getTime(), eventType: 'SENT', payload: "EVENT PAYLOAD", sequence: 9 },],
             );
-            expect(db.query).toHaveBeenCalledTimes(3);
+            expect(db.query).toHaveBeenCalledTimes(2);
             expect(db.query).toHaveBeenNthCalledWith(1,
                 {
                     ExpressionAttributeValues: { ':key': "orders:1" },
                     KeyConditionExpression: "aggregation_streamid = :key",
-                    Limit: 2,
+                    Limit: 5,
                     ScanIndexForward: false,
                     TableName: "events",
                 }
             );
             expect(db.query).toHaveBeenNthCalledWith(2,
                 {
-                    ExclusiveStartKey: 2,
+                    ExclusiveStartKey: 5,
                     ExpressionAttributeValues: { ':key': "orders:1" },
                     KeyConditionExpression: "aggregation_streamid = :key",
                     Limit: 5,
                     ScanIndexForward: false,
                     TableName: "events",
-                }
-            );
-            expect(db.query).toHaveBeenNthCalledWith(3,
-                {
-                    ExclusiveStartKey: 2,
-                    ExpressionAttributeValues: { ':key': "orders:1" },
-                    KeyConditionExpression: "aggregation_streamid = :key",
-                    Limit: 5,
-                    ScanIndexForward: false,
-                    TableName: "events",
-                }
-            );
-        });
-
-        it('should be able to get all events when table does not exist', async () => {
-            awsSdkPromiseResponse.mockReturnValue(Promise.resolve({
-                Items: [eventItemReturned]
-            }));
-
-            const dynamodbProvider: DynamodbProvider = new DynamodbProvider(dynamodbConfig);
-            const events = await dynamodbProvider.getEvents({ aggregation: "orders", id: "1" } as Stream);
-
-            expect(events).toEqual(
-                [{ commitTimestamp: NOW.getTime(), eventType: 'SENT', payload: "EVENT PAYLOAD", sequence: 0 }]
-            );
-            expect(db.query).toHaveBeenCalledTimes(1);
-            expect(db.query).toHaveBeenCalledWith(
-                {
-                    ExpressionAttributeValues: { ':key': "orders:1" },
-                    KeyConditionExpression: "aggregation_streamid = :key",
-                    ScanIndexForward: false,
-                    TableName: "events"
                 }
             );
         });
@@ -363,7 +354,7 @@ describe('EventStory Dynamodb Provider', () => {
 
             const dynamodbProvider: DynamodbProvider = new DynamodbProvider(dynamodbConfig);
 
-            await expect(async () => await dynamodbProvider.getAggregations()).rejects.toThrow('Method not supported');
+            await expect(async () => await dynamodbProvider.getAggregations(5, 5)).rejects.toThrow('Method not supported');
         });
 
     });
@@ -374,7 +365,7 @@ describe('EventStory Dynamodb Provider', () => {
 
             const dynamodbProvider: DynamodbProvider = new DynamodbProvider(dynamodbConfig);
 
-            await expect(async () => await dynamodbProvider.getStreams('')).rejects.toThrow('Method not supported');
+            await expect(async () => await dynamodbProvider.getStreams('', 5, 2)).rejects.toThrow('Method not supported');
         });
 
     });

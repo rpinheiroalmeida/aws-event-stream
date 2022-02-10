@@ -2,7 +2,6 @@
 
 import AWS = require('aws-sdk');
 import { DocumentClient, ItemList, QueryOutput } from 'aws-sdk/clients/dynamodb';
-import * as _ from 'lodash';
 import { Config } from '../dynamodb/dynamodb-config';
 import { Event, EventType } from '../model/event';
 import { Stream } from '../model/stream';
@@ -64,12 +63,12 @@ export class DynamodbProvider implements PersistenceProvider {
         };
         const pageSize = offset + limit;
         if (pageSize > 0) {
-            filter = _.merge(filter, { Limit: limit });
+            filter = { ...filter, ...{ Limit: limit } };
         }
 
         let items: ItemList = [];
         do {
-            filter = _.merge(filter, { ExclusiveStartKey: exclusiveStartKey });
+            filter = { ...filter, ...{ ExclusiveStartKey: exclusiveStartKey } };
             const queryOutput: QueryOutput = (await this.documentClient.query(filter).promise());
             exclusiveStartKey = queryOutput.LastEvaluatedKey || null;
             items = items.concat(queryOutput.Items);
@@ -88,11 +87,11 @@ export class DynamodbProvider implements PersistenceProvider {
         return pageSize <= 0 ? events.slice(offset) : events.slice(offset, pageSize);
     }
 
-    public async getAggregations(offset: number = 0, limit: number = -1): Promise<Array<string>> {
+    public async getAggregations(offset: number, limit: number): Promise<Array<string>> {
         throw new Error('Method not supported');
     }
 
-    public async getStreams(aggregation: string, offset: number = 0, limit: number = -1): Promise<Array<string>> {
+    public async getStreams(aggregation: string, offset: number, limit: number): Promise<Array<string>> {
         throw new Error('Method not supported');
     }
 
