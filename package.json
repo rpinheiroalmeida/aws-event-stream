@@ -93,9 +93,6 @@
     "tslint-config-prettier": "^1.18.0",
     "typescript": "^3.3.3"
   },
-  "dependencies": {
-    "async": "^3.2.0"
-  },
   "publishConfig": {
     "access": "public"
   }
