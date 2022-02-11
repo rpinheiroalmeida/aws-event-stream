@@ -94,8 +94,7 @@
     "typescript": "^3.3.3"
   },
   "dependencies": {
-    "async": "^3.2.0",
-    "joi": "^13.7.0"
+    "async": "^3.2.0"
   },
   "publishConfig": {
     "access": "public"
