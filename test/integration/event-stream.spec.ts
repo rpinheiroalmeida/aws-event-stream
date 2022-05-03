@@ -3,7 +3,7 @@ jest.unmock('aws-sdk/clients/dynamodb');
 jest.setTimeout(100000);
 
 import * as AWS from "aws-sdk";
-import { SNS, SQS } from "aws-sdk";
+import { SQS } from "aws-sdk";
 import { Config, DynamodbProvider, EventStore } from "../../src";
 import { AWSConfig } from "../../src/aws/config";
 import { SNSPublisher } from "../../src/publisher/sns";
