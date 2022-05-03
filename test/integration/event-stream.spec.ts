@@ -42,7 +42,7 @@ describe.only('EventStream', () => {
 
     it('publish a message', async () => {
 
-        var params = {
+        const params = {
             // Remove DelaySeconds parameter and value for FIFO queues
             DelaySeconds: 10,
             MessageAttributes: {
