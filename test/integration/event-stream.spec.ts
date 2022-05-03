@@ -41,6 +41,10 @@ describe.only('EventStream', () => {
     });
 
     it('publish a message', async () => {
+        const queues = sqs.listQueues();
+        expect(queues).toEqual({});
+
+
         const eventStore = new EventStore(
             new DynamodbProvider(dynamodbConfig),
             new SNSPublisher('arn:aws:sns:us-east-1:000000000000:order-events', { region: 'us-east-1' }, { endpointUrl: 'http://localhost:4566' }),
