@@ -24,7 +24,7 @@
     "postversion": "git push origin master",
     "pretest": "cross-env NODE_ENV=test npm run build && npm run lint",
     "test": "jest --config ./test/jest.config.js --coverage --silent test/unit",
-    "test:integration": "jest --config ./test/jest.config.js --silent test/integration",
+    "test:integration": "npm run test:integration:setup && jest --config ./test/jest.config.js --silent test/integration && npm run test:integration:teardown",
     "test:integration:setup": "test/integration/fixture/setup.sh",
     "test:integration:teardown": "test/integration/fixture/teardown.sh",
     "test:unit": "jest --config ./test/jest.config.js --coverage --silent test/unit",
