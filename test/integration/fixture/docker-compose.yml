@@ -1,10 +1,6 @@
 version: '3.2'
 
 services:
-  # sqs:
-  #   image: softwaremill/elasticmq:latest
-  #   ports:
-  #     - "9324:9324"
   localstack:
     container_name: "${LOCALSTACK_DOCKER_NAME-localstack_main}"
     image: localstack/localstack:latest
@@ -20,11 +16,6 @@ services:
       - '/var/run/docker.sock:/var/run/docker.sock'
     networks:
       - integration_test_network
-  # redis:
-  #   container_name: redis
-  #   image: redis:alpine
-  #   ports:
-  #     - 6379:6379
 
 networks:
   integration_test_network:
