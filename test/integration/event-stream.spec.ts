@@ -18,14 +18,14 @@ describe.only('EventStream', () => {
     const dynamodbConfig: Config = {
         awsConfig: awsConfign,
         dynamodb: {
-            tableName: 'order-events',
             endpointUrl: 'http://localhost:4566',
+            tableName: 'order-events',
         },
     };
 
     const sqs = new SQS({
-        region: 'us-east-1',
         endpoint: 'http://localhost:4566',
+        region: 'us-east-1',
     });
 
     it('publish a message', async () => {
@@ -34,23 +34,23 @@ describe.only('EventStream', () => {
             new SNSPublisher('arn:aws:sns:us-east-1:000000000000:order-events', { region: 'us-east-1' }, { endpointUrl: 'http://localhost:4566' }),
         );
         const event = {
+            document: {
+                identifier: '321'
+            },
             eventType: 'PLACED',
-            version: 1,
             proposal: {
                 id: '123',
                 offer: 'new-offer'
             },
-            document: {
-                identifier: '321'
-            }
+            version: 1,
         };
 
         const eventPlaced = await eventStore.getEventStream('Order', '123456').addEvent(event);
 
         const messageReceived = await sqs.receiveMessage({
-            QueueUrl: 'http://localhost:4566/000000000000/order-events-placed',
             AttributeNames: ['All'],
-            MessageAttributeNames: ['All']
+            MessageAttributeNames: ['All'],
+            QueueUrl: 'http://localhost:4566/000000000000/order-events-placed',
         }).promise();
 
 
@@ -72,8 +72,8 @@ describe.only('EventStream', () => {
                     version: 1,
                 },
             })
-        )
-        expect(eventPlaced.commitTimestamp).not.toBeUndefined()
+        );
+        expect(eventPlaced.commitTimestamp).not.toBeUndefined();
 
         expect(eventPlaced).toEqual(
             expect.objectContaining({
@@ -94,7 +94,6 @@ describe.only('EventStream', () => {
 
         const events = await eventStore.getEventStream('Order', '123456').getEvents();
 
-        console.log(JSON.stringify(events));
         expect(events[0].payload).toEqual({
             document: {
                 identifier: "321",
