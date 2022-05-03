@@ -44,35 +44,35 @@ describe.only('EventStream', () => {
 
     it('publish a message', async () => {
 
-        const params = {
-            // Remove DelaySeconds parameter and value for FIFO queues
-            DelaySeconds: 10,
-            MessageAttributes: {
-                "Author": {
-                    DataType: "String",
-                    StringValue: "John Grisham"
-                },
-                "Title": {
-                    DataType: "String",
-                    StringValue: "The Whistler"
-                },
-                "WeeksOn": {
-                    DataType: "Number",
-                    StringValue: "6"
-                }
-            },
-            MessageBody: "Information about current NY Times fiction bestseller for week of 12/11/2016.",
-            QueueUrl: "http://localhost:4566/000000000000/order-events-placed"
-        };
-        await sqs.sendMessage(params).promise();
-        await sleep(10000);
+        // const params = {
+        //     // Remove DelaySeconds parameter and value for FIFO queues
+        //     DelaySeconds: 10,
+        //     MessageAttributes: {
+        //         "Author": {
+        //             DataType: "String",
+        //             StringValue: "John Grisham"
+        //         },
+        //         "Title": {
+        //             DataType: "String",
+        //             StringValue: "The Whistler"
+        //         },
+        //         "WeeksOn": {
+        //             DataType: "Number",
+        //             StringValue: "6"
+        //         }
+        //     },
+        //     MessageBody: "Information about current NY Times fiction bestseller for week of 12/11/2016.",
+        //     QueueUrl: "http://localhost:4566/000000000000/order-events-placed"
+        // };
+        // await sqs.sendMessage(params).promise();
+        // await sleep(10000);
 
-        const message = await sqs.receiveMessage({
-            AttributeNames: ['All'],
-            MessageAttributeNames: ['All'],
-            QueueUrl: 'http://localhost:4566/000000000000/order-events-placed',
-        }).promise();
-        expect(message).toEqual({});
+        // const message = await sqs.receiveMessage({
+        //     AttributeNames: ['All'],
+        //     MessageAttributeNames: ['All'],
+        //     QueueUrl: 'http://localhost:4566/000000000000/order-events-placed',
+        // }).promise();
+        // expect(message).toEqual({});
 
         const eventStore = new EventStore(
             new DynamodbProvider(dynamodbConfig),
@@ -91,6 +91,8 @@ describe.only('EventStream', () => {
         };
 
         const eventPlaced = await eventStore.getEventStream('Order', '123456').addEvent(event);
+
+        await sleep(10000);
 
         const messageReceived = await sqs.receiveMessage({
             AttributeNames: ['All'],
