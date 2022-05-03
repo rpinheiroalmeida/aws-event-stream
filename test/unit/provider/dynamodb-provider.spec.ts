@@ -130,12 +130,23 @@ describe('EventStory Dynamodb Provider', () => {
 
 
                 const dynamodbProvider: any = new DynamodbProvider(config);
-                const eventAdded = await dynamodbProvider.addEvent({ aggregation: 'orders', id: '1' }, { payload: 'EVENT PAYLOAD', eventType: 'SENT' });
+                const eventAdded = await dynamodbProvider.addEvent(
+                    {
+                        aggregation: 'orders',
+                        id: '1'
+                    },
+                    {
+                        payload: 'EVENT PAYLOAD',
+                        eventType: 'SENT'
+                    });
 
                 expect(eventAdded).toEqual({
                     commitTimestamp: NOW.getTime(),
                     eventType: 'SENT',
-                    payload: 'EVENT PAYLOAD',
+                    payload: {
+                        payload: 'EVENT PAYLOAD',
+                        eventType: 'SENT'
+                    },
                 });
                 expect(db.put).toHaveBeenCalledTimes(1);
                 expect(db.put).toHaveBeenCalledWith(
