@@ -8,3 +8,8 @@ reports/
 .python-version
 .stryker-tmp/
 test-report.xml
+test/integration/.localstack/
+test/integration/fixture/terraform/.terraform
+test/integration/fixture/terraform/terraform.state
+test/integration/fixture/terraform/terraform.tfstate.backup
+test/integration/fixture/terraform/.terraform.lock.hcl
