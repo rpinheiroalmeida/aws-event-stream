@@ -64,7 +64,7 @@ describe.only('EventStream', () => {
             MessageBody: "Information about current NY Times fiction bestseller for week of 12/11/2016.",
             QueueUrl: "http://localhost:4566/000000000000/order-events-placed"
         };
-        sqs.sendMessage(params);
+        await sqs.sendMessage(params).promise();
         await sleep(10000);
 
         const message = await sqs.receiveMessage({
