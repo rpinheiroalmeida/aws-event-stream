@@ -100,11 +100,9 @@ describe.only('EventStream', () => {
             QueueUrl: 'http://localhost:4566/000000000000/order-events-placed',
         }).promise();
 
-
-        expect(messageReceived).toEqual({});
         expect(messageReceived).not.toBeUndefined();
         expect(messageReceived.Messages).not.toBeUndefined();
-        expect(messageReceived.Messages).toEqual('');
+
         const eventReceived = JSON.parse(JSON.parse(messageReceived.Messages[0].Body).Message);
 
         expect(eventReceived.event.commitTimestamp).not.toBeUndefined();
