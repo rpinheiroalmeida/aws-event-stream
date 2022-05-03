@@ -6,12 +6,12 @@ import AWS = require('aws-sdk');
 import { DocumentClient } from 'aws-sdk/clients/dynamodb';
 import DynamoDB = require('aws-sdk/clients/dynamodb');
 import { DynamodbProvider, EventStore, EventStream } from '../../src';
-import { Schema } from './schema';
+// import { Schema } from './schema';
 
 jest.setTimeout(10000);
 
 // tslint:disable:no-unused-expression
-describe('EventStory Dynamodb Provider (Integration)', () => {
+describe.skip('EventStory Dynamodb Provider (Integration)', () => {
     let eventStore: EventStore;
     let ordersStream: EventStream;
     const EVENT_PAYLOAD = { eventType: 'SENT', text: 'Event Data' };
@@ -46,8 +46,6 @@ describe('EventStory Dynamodb Provider (Integration)', () => {
     });
 
     beforeEach(async () => {
-        const schema = new Schema(dynamodbConfig);
-        await schema.createTables();
         await truncateTable(ordersStream);
     });
 

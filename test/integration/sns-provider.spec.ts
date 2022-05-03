@@ -7,7 +7,7 @@ import { SNSPublisher } from '../../src';
 jest.setTimeout(10000);
 
 // tslint:disable:no-unused-expression
-describe('EventStory Dynamodb Provider (Integration)', () => {
+describe.skip('EventStory Dynamodb Provider (Integration)', () => {
 
     const awsConfign = {
         credentials: {

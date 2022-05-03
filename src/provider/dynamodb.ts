@@ -49,7 +49,7 @@ export class DynamodbProvider implements PersistenceProvider {
         return {
             commitTimestamp: commitTimestamp,
             eventType: data.eventType,
-            payload: data.payload,
+            payload: data,
         };
     }
 
