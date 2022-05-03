@@ -1,6 +1,6 @@
 jest.deepUnmock('aws-sdk');
 jest.unmock('aws-sdk/clients/dynamodb');
-jest.setTimeout(100000);
+jest.setTimeout(1000000);
 
 import * as AWS from "aws-sdk";
 import { SQS } from "aws-sdk";
@@ -40,6 +40,8 @@ describe.only('EventStream', () => {
         region: 'us-east-1',
     });
 
+    const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
     it('publish a message', async () => {
 
         const params = {
@@ -63,6 +65,8 @@ describe.only('EventStream', () => {
             QueueUrl: "http://localhost:4566/000000000000/order-events-placed"
         };
         sqs.sendMessage(params);
+        await sleep(5000);
+
         const message = await sqs.receiveMessage({
             AttributeNames: ['All'],
             MessageAttributeNames: ['All'],
