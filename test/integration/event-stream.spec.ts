@@ -13,16 +13,16 @@ describe.only('EventStream', () => {
     AWS.config.update(
         {
             credentials: {
-                accessKeyId: 'aws-event-stream',
-                secretAccessKey: 'aws-event-stream',
+                accessKeyId: 'mock_access_key',
+                secretAccessKey: 'mock_access_key',
             },
             region: "us-east-1"
         });
 
     const awsConfig: AWSConfig = {
         credentials: {
-            accessKeyId: '123456-localstack',
-            secretAccessKey: '123456-localstack',
+            accessKeyId: 'mock_access_key',
+            secretAccessKey: 'mock_access_key',
         },
         region: "us-east-1"
     };
