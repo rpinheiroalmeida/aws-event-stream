@@ -22,7 +22,7 @@
     "lint": "tslint ./src/**/*.ts ./test/**/*.ts",
     "lint:fix": "tslint --fix ./src/**/*.ts ./test/**/*.ts -t verbose",
     "postversion": "git push origin master",
-    "pretest": "cross-env NODE_ENV=test npm run build && npm run lint",
+    "pretest": "cross-env NODE_ENV=test npm run build",
     "test": "jest --config ./test/jest.config.js --coverage --silent test/unit",
     "test:integration": "npm run test:integration:setup && jest --config ./test/jest.config.js --silent test/integration && npm run test:integration:teardown",
     "test:integration:setup": "test/integration/fixture/setup.sh",
