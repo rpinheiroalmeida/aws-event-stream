@@ -19,3 +19,9 @@ echo "${yel}Inicializando a criação dos recursos necessários da AWS no Locals
 test/integration/fixture/create-resource.sh
 
 echo "${grn}Recursos do ambiente de testes integrados criados com sucesso${end}"
+
+echo "${grn}QUEUES${end}"
+aws sqs --endpoint-url=http://localhost:4566 list-queues
+
+echo "${grn}SNSs${end}"
+aws sns --endpoint-url=http://localhost:4566 list-subscriptions
