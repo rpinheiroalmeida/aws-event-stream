@@ -42,10 +42,29 @@ describe.only('EventStream', () => {
 
     it('publish a message', async () => {
 
-        // const sns = new SNS({ endpoint: ('http://localhost:4566') });
-        // const topics = await sns.listSubscriptions().promise();
-        // expect(topics).toEqual({});
-
+        var params = {
+            // Remove DelaySeconds parameter and value for FIFO queues
+            DelaySeconds: 10,
+            MessageAttributes: {
+                "Title": {
+                    DataType: "String",
+                    StringValue: "The Whistler"
+                },
+                "Author": {
+                    DataType: "String",
+                    StringValue: "John Grisham"
+                },
+                "WeeksOn": {
+                    DataType: "Number",
+                    StringValue: "6"
+                }
+            },
+            MessageBody: "Information about current NY Times fiction bestseller for week of 12/11/2016.",
+            // MessageDeduplicationId: "TheWhistler",  // Required for FIFO queues
+            // MessageGroupId: "Group1",  // Required for FIFO queues
+            QueueUrl: "SQS_QUEUE_URL"
+        };
+        const expected = sqs.sendMessage(params);
 
         const eventStore = new EventStore(
             new DynamodbProvider(dynamodbConfig),
