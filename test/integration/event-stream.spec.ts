@@ -65,10 +65,9 @@ describe.only('EventStream', () => {
             QueueUrl: 'http://localhost:4566/000000000000/order-events-placed',
         }).promise();
 
-        /* eslint no-console: "error" */
-        console.log(`Message RECEIVED = ${messageReceived}`);
         expect(messageReceived).not.toBeNull();
         expect(messageReceived.Messages).not.toBeNull();
+        expect(messageReceived.Messages).toEqual('');
         const eventReceived = JSON.parse(JSON.parse(messageReceived.Messages[0].Body).Message);
 
         expect(eventReceived.event.commitTimestamp).not.toBeUndefined();
