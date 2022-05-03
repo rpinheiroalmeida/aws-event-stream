@@ -64,7 +64,8 @@ describe.only('EventStream', () => {
             // MessageGroupId: "Group1",  // Required for FIFO queues
             QueueUrl: "SQS_QUEUE_URL"
         };
-        const expected = sqs.sendMessage(params);
+        const message = sqs.sendMessage(params);
+        expect(message).toEqual({});
 
         const eventStore = new EventStore(
             new DynamodbProvider(dynamodbConfig),
