@@ -60,12 +60,15 @@ describe.only('EventStream', () => {
                 }
             },
             MessageBody: "Information about current NY Times fiction bestseller for week of 12/11/2016.",
-            // MessageDeduplicationId: "TheWhistler",  // Required for FIFO queues
-            // MessageGroupId: "Group1",  // Required for FIFO queues
-            QueueUrl: "SQS_QUEUE_URL"
+            QueueUrl: "http://localhost:4566/000000000000/order-events-placed"
         };
         sqs.sendMessage(params);
-        // expect(message).toEqual({});
+        const message = await sqs.receiveMessage({
+            AttributeNames: ['All'],
+            MessageAttributeNames: ['All'],
+            QueueUrl: 'http://localhost:4566/000000000000/order-events-placed',
+        }).promise();
+        expect(message).toEqual({});
 
         const eventStore = new EventStore(
             new DynamodbProvider(dynamodbConfig),
