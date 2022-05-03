@@ -1,13 +1,25 @@
 jest.deepUnmock('aws-sdk');
 jest.unmock('aws-sdk/clients/dynamodb');
 jest.setTimeout(100000);
+
+import AWS = require('aws-sdk');
 import { SQS } from "aws-sdk";
 import { Config, DynamodbProvider, EventStore } from "../../src";
+import { AWSConfig } from "../../src/aws/config";
 import { SNSPublisher } from "../../src/publisher/sns";
 
 describe.only('EventStream', () => {
 
-    const awsConfign = {
+    AWS.config.update(
+        {
+            credentials: {
+                accessKeyId: 'aws-event-stream',
+                secretAccessKey: 'aws-event-stream',
+            },
+            region: "us-east-1"
+        });
+
+    const awsConfig: AWSConfig = {
         credentials: {
             accessKeyId: '123456-localstack',
             secretAccessKey: '123456-localstack',
@@ -16,7 +28,7 @@ describe.only('EventStream', () => {
     };
 
     const dynamodbConfig: Config = {
-        awsConfig: awsConfign,
+        awsConfig: awsConfig,
         dynamodb: {
             endpointUrl: 'http://localhost:4566',
             tableName: 'order-events',
