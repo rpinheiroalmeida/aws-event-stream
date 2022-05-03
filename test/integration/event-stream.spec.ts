@@ -42,9 +42,9 @@ describe.only('EventStream', () => {
 
     it('publish a message', async () => {
 
-        const sns = new SNS({ endpoint: ('http://localhost:4566') });
-        const topics = await sns.listSubscriptions().promise();
-        expect(topics).toEqual({});
+        // const sns = new SNS({ endpoint: ('http://localhost:4566') });
+        // const topics = await sns.listSubscriptions().promise();
+        // expect(topics).toEqual({});
 
 
         const eventStore = new EventStore(
@@ -71,8 +71,10 @@ describe.only('EventStream', () => {
             QueueUrl: 'http://localhost:4566/000000000000/order-events-placed',
         }).promise();
 
-        expect(messageReceived).not.toBeNull();
-        expect(messageReceived.Messages).not.toBeNull();
+
+        expect(messageReceived).toEqual({});
+        expect(messageReceived).not.toBeUndefined();
+        expect(messageReceived.Messages).not.toBeUndefined();
         expect(messageReceived.Messages).toEqual('');
         const eventReceived = JSON.parse(JSON.parse(messageReceived.Messages[0].Body).Message);
 
