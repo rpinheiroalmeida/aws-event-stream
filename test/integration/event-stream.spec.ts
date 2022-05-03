@@ -3,7 +3,7 @@ jest.unmock('aws-sdk/clients/dynamodb');
 jest.setTimeout(100000);
 
 import * as AWS from "aws-sdk";
-import { SQS } from "aws-sdk";
+import { SNS, SQS } from "aws-sdk";
 import { Config, DynamodbProvider, EventStore } from "../../src";
 import { AWSConfig } from "../../src/aws/config";
 import { SNSPublisher } from "../../src/publisher/sns";
@@ -41,13 +41,15 @@ describe.only('EventStream', () => {
     });
 
     it('publish a message', async () => {
-        const queues = sqs.listQueues();
-        expect(queues).toEqual({});
+
+        const sns = new SNS({ endpoint: ('http://localhost:4566') });
+        const topics = await sns.listTopics().promise();
+        expect(topics).toEqual({});
 
 
         const eventStore = new EventStore(
             new DynamodbProvider(dynamodbConfig),
-            new SNSPublisher('arn:aws:sns:us-east-1:000000000000:order-events', { region: 'us-east-1' }, { endpointUrl: 'http://localhost:4566' }),
+            new SNSPublisher('arn:aws:sns:us-east-1:000000000000:order-events', awsConfig, { endpointUrl: 'http://localhost:4566' }),
         );
         const event = {
             document: {
