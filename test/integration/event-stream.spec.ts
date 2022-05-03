@@ -65,7 +65,7 @@ describe.only('EventStream', () => {
             QueueUrl: "http://localhost:4566/000000000000/order-events-placed"
         };
         sqs.sendMessage(params);
-        await sleep(5000);
+        await sleep(10000);
 
         const message = await sqs.receiveMessage({
             AttributeNames: ['All'],
