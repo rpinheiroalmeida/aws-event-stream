@@ -43,7 +43,7 @@ describe.only('EventStream', () => {
     it('publish a message', async () => {
 
         const sns = new SNS({ endpoint: ('http://localhost:4566') });
-        const topics = await sns.listTopics().promise();
+        const topics = await sns.listSubscriptions().promise();
         expect(topics).toEqual({});
 
 
