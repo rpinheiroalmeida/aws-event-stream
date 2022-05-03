@@ -27,3 +27,9 @@ docker container run --rm -i -v $PWD/test/integration/fixture/terraform:/app -w 
 docker container run --rm -i -v $PWD/test/integration/fixture/terraform:/app -w /app --entrypoint "" --link localstack_main --env TF_VAR_HOST=localstack_main --network "$CURRENT_DIR"_integration_test_network hashicorp/terraform:light terraform plan
 docker container run --rm -i -v $PWD/test/integration/fixture/terraform:/app -w /app --entrypoint "" --link localstack_main --env TF_VAR_HOST=localstack_main --network "$CURRENT_DIR"_integration_test_network hashicorp/terraform:light terraform apply -lock=false -auto-approve
 echo "${yel}Recursos criados no Localstack com Sucesso${end}"
+
+echo "${grn}QUEUES${end}"
+aws sqs --endpoint-url=http://localhost:4566 list-queues
+
+echo "${grn}SNSs${end}"
+aws sns --endpoint-url=http://localhost:4566 list-subscriptions
