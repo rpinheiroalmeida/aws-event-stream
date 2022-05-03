@@ -46,13 +46,13 @@ describe.only('EventStream', () => {
             // Remove DelaySeconds parameter and value for FIFO queues
             DelaySeconds: 10,
             MessageAttributes: {
-                "Title": {
-                    DataType: "String",
-                    StringValue: "The Whistler"
-                },
                 "Author": {
                     DataType: "String",
                     StringValue: "John Grisham"
+                },
+                "Title": {
+                    DataType: "String",
+                    StringValue: "The Whistler"
                 },
                 "WeeksOn": {
                     DataType: "Number",
