@@ -97,6 +97,40 @@ describe('EventStory Dynamodb Provider', () => {
                 );
             });
 
+            it('when the conditionalExpression property is settled in the table', async () => {
+                const dynamodbConfig = {
+                    awsConfig: {
+                        region: 'us-east-1',
+                    },
+                    dynamodb: {
+                        tableName: 'events',
+                        conditionalExpression: 'attribute_not_exists(eventType)',
+                    },
+                } as Config;
+                const dynamodbProvider = new DynamodbProvider(dynamodbConfig);
+                await dynamodbProvider.addEvent({ aggregation: 'orders', id: '1' }, { text: 'EVENT PAYLOAD', eventType: 'SENT' });
+                expect(db.put).toHaveBeenLastCalledWith(
+                    {
+                        Item: {
+                            aggregation_streamid: 'orders:1',
+                            commitTimestamp: NOW.getTime(),
+                            eventType: 'SENT',
+                            payload: {
+                                eventType: 'SENT',
+                                text: 'EVENT PAYLOAD'
+                            },
+                            stream: {
+                                aggregation: 'orders',
+                                id: '1',
+                            },
+                        },
+                        TableName: 'events',
+                        ConditionalExpression: 'attribute_not_exists(eventType)',
+                    }
+                );
+                
+            });
+
             it('when table events exists', async () => {
 
                 const dynamodbProvider = new DynamodbProvider(dynamodbConfig);
