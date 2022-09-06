@@ -40,7 +40,7 @@ export class DynamodbProvider implements PersistenceProvider {
             ttl: this.config.dynamodb.ttl ? (commitTimetampSeconds + this.config.dynamodb.ttl) : undefined,
         };
         const record = {
-            ConditionalExpression: this.config.dynamodb.conditionalExpression,
+            ConditionExpression: this.config.dynamodb.conditionExpression,
             Item: event,
             TableName: this.config.dynamodb.tableName,
         };

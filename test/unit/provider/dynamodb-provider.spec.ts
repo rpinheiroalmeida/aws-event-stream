@@ -104,7 +104,7 @@ describe('EventStory Dynamodb Provider', () => {
                     },
                     dynamodb: {
                         tableName: 'events',
-                        conditionalExpression: 'attribute_not_exists(eventType)',
+                        conditionExpression: 'attribute_not_exists(eventType)',
                     },
                 } as Config;
                 const dynamodbProvider = new DynamodbProvider(dynamodbConfig);
@@ -125,7 +125,7 @@ describe('EventStory Dynamodb Provider', () => {
                             },
                         },
                         TableName: 'events',
-                        ConditionalExpression: 'attribute_not_exists(eventType)',
+                        ConditionExpression: 'attribute_not_exists(eventType)',
                     }
                 );
                 

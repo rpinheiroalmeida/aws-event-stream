@@ -12,6 +12,6 @@ export interface Config {
         maxRetries?: number;
         httpOptions?: HTTPOptions;
         ttl?: number;
-        conditionalExpression?: string;
+        conditionExpression?: string;
     };
 }
